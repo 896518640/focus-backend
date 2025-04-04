@@ -1,0 +1,145 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(uuid())
+  username      String    @unique
+  email         String    @unique
+  password      String
+  avatar        String?   // 头像URL
+  role          String    @default("user") // user, premium, admin
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  lastLoginAt   DateTime?
+  refreshToken  String?
+  isActive      Boolean   @default(true)
+
+  // 关联
+  membership    Membership?
+  usageStats    UsageStats?
+  activities    Activity[]
+  audioJobs     AudioJob[]
+  translations  Translation[]
+  settings      UserSettings?
+
+  @@map("users")
+}
+
+// 会员信息模型
+model Membership {
+  id            String    @id @default(uuid())
+  type          String    // "free", "premium", "enterprise"
+  startDate     DateTime  @default(now())
+  endDate       DateTime?
+  isActive      Boolean   @default(true)
+  
+  // 关联
+  userId        String    @unique
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("memberships")
+}
+
+// 使用统计模型
+model UsageStats {
+  id               String  @id @default(uuid())
+  studyHours       Float   @default(0)
+  recognitionCount Int     @default(0)
+  fileCount        Int     @default(0)
+  translationCount Int     @default(0)
+  summaryCount     Int     @default(0)
+  
+  // 关联
+  userId           String  @unique
+  user             User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("usage_stats")
+}
+
+// 用户活动记录模型
+model Activity {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  type        String   // "recognition", "upload", "summary", "translation", etc.
+  icon        String?  // 前端图标名称
+  iconBg      String?  // 图标背景色
+  createdAt   DateTime @default(now())
+  
+  // 关联
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // 可选关联到具体业务对象
+  audioJobId  String?
+  audioJob    AudioJob? @relation(fields: [audioJobId], references: [id])
+
+  @@map("activities")
+}
+
+// 音频处理任务模型
+model AudioJob {
+  id             String    @id @default(uuid())
+  filename       String?
+  fileUrl        String?
+  duration       Float?    // 音频时长(秒)
+  status         String    // "pending", "processing", "completed", "failed"
+  sourceText     String?   @db.Text // 识别/转录的原文
+  translatedText String?   @db.Text // 翻译后的文本
+  summary        String?   @db.Text // 摘要内容
+  sourceLanguage String?
+  targetLanguage String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  
+  // 关联
+  userId         String
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  activities     Activity[]
+
+  @@map("audio_jobs")
+}
+
+// 翻译记录模型
+model Translation {
+  id             String   @id @default(uuid())
+  sourceText     String   @db.Text
+  translatedText String   @db.Text
+  sourceLanguage String
+  targetLanguage String
+  isFavorite     Boolean  @default(false)
+  isVoice        Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  
+  // 关联
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("translations")
+}
+
+// 用户设置模型
+model UserSettings {
+  id                   String  @id @default(uuid())
+  defaultSourceLanguage String  @default("zh_cn")
+  defaultTargetLanguage String  @default("en_us")
+  autoTranslate        Boolean @default(true)
+  autoSpeak            Boolean @default(false)
+  speechRate           Float   @default(1)
+  theme                String  @default("system") // "light", "dark", "system"
+  
+  // 关联
+  userId               String  @unique
+  user                 User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_settings")
+}

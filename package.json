@@ -1,0 +1,53 @@
+{
+  "name": "speakflow-backend",
+  "version": "1.0.0",
+  "description": "语音识别后端服务，支持讯飞语音识别API",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "nodemon src/index.js",
+    "dev": "nodemon --watch src -e js src/index.js",
+    "lint": "eslint src/**/*.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "db:setup": "npx prisma migrate dev",
+    "db:seed": "npx prisma db seed",
+    "db:studio": "npx prisma studio",
+    "db:pull": "npx prisma db pull",
+    "db:push": "npx prisma db push",
+    "db:reset": "npx prisma db reset",
+    "db:generate": "npx prisma generate",
+    "init:admin": "node src/scripts/createAdminUser.js"
+  },
+  "keywords": [
+    "speech-recognition",
+    "speech-to-text",
+    "iflytek",
+    "websocket",
+    "socket.io"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@alicloud/openapi-client": "^0.4.13",
+    "@alicloud/tea-util": "^1.4.10",
+    "@alicloud/tingwu20230930": "2.0.20",
+    "@google-cloud/speech": "^6.7.0",
+    "@prisma/client": "^6.5.0",
+    "axios": "^1.7.9",
+    "bcrypt": "^5.1.1",
+    "crypto-js": "^4.2.0",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "express-validator": "^7.2.1",
+    "ffmpeg-static": "^5.2.0",
+    "ioredis": "^5.5.0",
+    "jsonwebtoken": "^9.0.2",
+    "log4node": "^0.1.6",
+    "mysql2": "^3.13.0",
+    "socket.io": "^4.8.1",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.3"
+  }
+}

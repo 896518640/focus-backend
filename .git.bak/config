@@ -1,0 +1,18 @@
+[core]
+	repositoryformatversion = 0
+	filemode = true
+	bare = false
+	logallrefupdates = true
+	ignorecase = true
+	precomposeunicode = true
+[remote "origin"]
+	url = https://github.com/896518640/focus-backend.git
+	fetch = +refs/heads/*:refs/remotes/origin/*
+[branch "master"]
+	remote = origin
+	merge = refs/heads/master
+[pull]
+	rebase = true
+[remote "focus"]
+	url = https://github.com/896518640/focus-backend.git
+	fetch = +refs/heads/*:refs/remotes/focus/*
