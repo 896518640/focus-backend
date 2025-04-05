@@ -5,6 +5,12 @@ import config, { validateConfig } from './config/index.js';
 import SpeechController from './controllers/speechController.js';
 import createLogger from './utils/logger.js';
 import apiV1Routes from './routes/v1/index.js';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+// 获取当前文件的目录路径
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const logger = createLogger('App');
 
@@ -49,6 +55,9 @@ app.use((req, res, next) => {
   
   next();
 });
+
+// 设置静态文件服务，用于访问上传的文件
+app.use('/uploads', express.static(path.join(process.cwd(), 'tmp', 'uploads')));
 
 // 初始化控制器
 new SpeechController(io);
