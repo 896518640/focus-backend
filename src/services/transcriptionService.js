@@ -27,24 +27,16 @@ class TranscriptionService {
       
       // 2. 准备转录参数
       const transcriptionOptions = {
-        taskKey: `task_${Date.now()}`,
-        sourceLanguage: options.sourceLanguage || 'cn',
-        type: options.type || 'offline'
+        ...options
       };
       
       // 根据上传结果，决定使用文件URL或OSS对象
       if (uploadResult.fileUrl) {
-        transcriptionOptions.fileUrl = uploadResult.fileUrl;
-      }
-      
-      if (uploadResult.ossObjectKey && uploadResult.ossBucket) {
-        transcriptionOptions.ossObjectKey = uploadResult.ossObjectKey;
-        transcriptionOptions.ossBucket = uploadResult.ossBucket;
-        transcriptionOptions.name = `转录任务-${path.basename(uploadResult.fileName)}`;
+        transcriptionOptions.input.fileUrl = uploadResult.fileUrl;
       }
       
       // 3. 创建转录任务
-      console.log('创建转录任务...');
+      console.log('创建转录任务...', transcriptionOptions);
       const taskResult = await tingwuService.createTranscriptionTask(transcriptionOptions);
       
       // 4. 返回结果

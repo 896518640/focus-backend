@@ -33,5 +33,7 @@ dist-ssr
 *.sln
 *.sw?
 
+/tmp/
+
 # Backup files
 .git.bak

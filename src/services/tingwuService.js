@@ -36,7 +36,7 @@ class TingwuService {
       // 您的AccessKey Secret
       accessKeySecret: process.env.ALIYUN_ACCESS_KEY_SECRET,
       // 访问的区域ID
-      regionId: "cn-hangzhou",
+      regionId: "cn-beijing",
       // 访问的域名
       endpoint: "tingwu.cn-beijing.aliyuncs.com"  // 根据官方示例调整为北京区域
     });
@@ -60,23 +60,28 @@ class TingwuService {
   async createTranscriptionTask(options) {
     try {
       // 检查必要参数
-      if (!options.fileUrl && !(options.ossObjectKey && options.ossBucket)) {
+      if (!options.input.fileUrl) {
         throw new Error('缺少必要参数：需要提供文件URL或OSS对象信息');
       }
 
 
       // 创建input对象
       const input = new Tingwu.CreateTaskRequestInput({
-        sourceLanguage: options.sourceLanguage || 'cn',
-        taskKey: options.taskKey || `task_${Date.now()}`,
-        fileUrl: options.fileUrl,
+        ...options.input
+      });
+
+      const parameters = new Tingwu.CreateTaskRequestParameters({
+        ...options.parameters
       });
 
       // 2. 创建CreateTaskRequest对象
       const createTaskRequest = new Tingwu.CreateTaskRequest({
           appKey: this.appKey,
-          input: input
+          input: input,
+          parameters: parameters
       });
+
+      console.log("createTaskRequest", createTaskRequest);
 
       createTaskRequest.type = options.type || 'offline';
       

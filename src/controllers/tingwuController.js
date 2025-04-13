@@ -61,11 +61,12 @@ class TingwuController {
 
       // 获取转录选项
       const options = {
-        sourceLanguage: req.body.sourceLanguage,
-        type: req.body.type
+        type: req.body.type,
+        input: JSON.parse(req.body.input),
+        parameters: JSON.parse(req.body.parameters)
       };
 
-      console.log("options", options);
+      console.log("options", options, req.body);
 
       // 调用转录服务
       const result = await transcriptionService.uploadAndTranscribe(req.file, options);
@@ -151,19 +152,10 @@ class TingwuController {
       // 调用通义听悟服务获取任务信息
       const result = await tingwuService.getTaskResult(taskId);
 
-      // 简化数据结构，直接返回关键信息
-      const simplifiedData = {
-        taskId: result.data?.taskId || taskId,
-        taskKey: result.data?.taskKey,
-        taskStatus: result.data?.taskStatus,
-        transcription: result.data?.result?.transcription,
-        message: result.message || 'success'
-      };
-
       return res.status(200).json({
         success: true,
         message: '获取任务信息成功',
-        data: simplifiedData
+        data: result.data
       });
     } catch (error) {
       console.error('获取任务信息失败:', error);
