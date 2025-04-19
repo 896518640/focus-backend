@@ -1,7 +1,6 @@
 // transcriptionService.js
 // 音频转录服务，负责音频转录流程管理
 
-import fileUploadService from './fileUploadService.js';
 import tingwuService from './tingwuService.js';
 import path from 'path';
 
@@ -12,47 +11,18 @@ import path from 'path';
 class TranscriptionService {
   /**
    * 上传并转录音频文件
-   * @param {Object} file - 上传的音频文件
-   * @param {Object} options - 转录选项
-   * @param {string} [options.sourceLanguage='cn'] - 音频语言，默认中文
-   * @param {string} [options.type='offline'] - 转录类型，默认离线转写
+   * @param {Object} taskOptions - 转录任务选项
    * @returns {Promise<Object>} 转录任务信息
    */
-  async uploadAndTranscribe(file, options = {}) {
-    try {
-      // 1. 上传文件
-      console.log('开始上传文件...');
-      const uploadResult = await fileUploadService.uploadFile(file);
-      console.log('文件上传成功:', uploadResult.fileName);
-      
-      // 2. 准备转录参数
-      const transcriptionOptions = {
-        ...options
-      };
-      
-      // 根据上传结果，决定使用文件URL或OSS对象
-      if (uploadResult.fileUrl) {
-        transcriptionOptions.input.fileUrl = uploadResult.fileUrl;
-      }
-      
-      // 3. 创建转录任务
-      console.log('创建转录任务...', transcriptionOptions);
-      const taskResult = await tingwuService.createTranscriptionTask(transcriptionOptions);
-      
-      // 4. 返回结果
-      return {
-        taskId: taskResult.data?.taskId,
-        status: taskResult.data?.status || 'PENDING',
-        fileName: uploadResult.fileName,
-        fileUrl: uploadResult.fileUrl,
-        ossObjectKey: uploadResult.ossObjectKey,
-        uploadResult,
-        taskResult: taskResult.data
-      };
-    } catch (error) {
-      console.error('上传并转录音频失败:', error);
-      throw new Error(`上传并转录音频失败: ${error.message}`);
-    }
+  async uploadAndTranscribe(taskOptions) {
+    // 仅创建转录任务，假设上传逻辑已在上游完成
+    console.log('创建转录任务...', taskOptions);
+    const taskResult = await tingwuService.createTranscriptionTask(taskOptions);
+    console.log('创建转录任务结果:', taskResult);
+    return {
+      taskId: taskResult.data.taskId,
+      status: taskResult.data.taskStatus,
+    };
   }
   
   /**

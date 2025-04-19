@@ -22,16 +22,13 @@ const upload = multer({
 // 文件上传路由
 router.post('/upload', upload.single('audio'), tingwuController.uploadFile);
 
-// 上传并转录路由
-router.post('/upload-and-transcribe', upload.single('audio'), tingwuController.uploadAndTranscribe);
-
-// 创建转录任务路由
+// 创建听悟 任务
 router.post('/tasks', tingwuController.createTask);
 
-// 获取任务信息路由
+// 查询听悟 状态
 router.get('/tasks/:taskId', tingwuController.getTaskInfo);
 
-// 轮询任务结果路由
+// 轮询听悟 任务结果
 router.get('/tasks/:taskId/poll', tingwuController.pollTaskResult);
 
 // 获取JSON文件内容路由

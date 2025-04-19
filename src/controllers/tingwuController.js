@@ -22,7 +22,7 @@ class TingwuController {
       if (!req.file) {
         return res.status(400).json({
           success: false,
-          message: '未找到上传文件'
+          message: '未找到上传文件22'
         });
       }
 
@@ -45,81 +45,31 @@ class TingwuController {
   }
 
   /**
-   * 上传音频并创建转录任务
-   * @param {Object} req - Express请求对象
-   * @param {Object} res - Express响应对象
-   */
-  async uploadAndTranscribe(req, res) {
-    try {
-      // 检查文件是否存在
-      if (!req.file) {
-        return res.status(400).json({
-          success: false,
-          message: '未找到上传文件'
-        });
-      }
-
-      // 获取转录选项
-      const options = {
-        type: req.body.type,
-        input: JSON.parse(req.body.input),
-        parameters: JSON.parse(req.body.parameters)
-      };
-
-      console.log("options", options, req.body);
-
-      // 调用转录服务
-      const result = await transcriptionService.uploadAndTranscribe(req.file, options);
-      console.log("result11111", result);
-      return res.status(200).json({
-        success: true,
-        message: '音频上传并创建转录任务成功',
-        data: result
-      });
-    } catch (error) {
-      console.error('音频上传或转录失败:', error);
-      return res.status(500).json({
-        success: false,
-        message: '音频上传或转录失败',
-        error: error.message
-      });
-    }
-  }
-
-  /**
    * 创建转录任务
    * @param {Object} req - Express请求对象
    * @param {Object} res - Express响应对象
    */
   async createTask(req, res) {
     try {
-      const { ossObjectKey, ossBucket, name, vocabularyId, fileUrl, taskKey, sourceLanguage, type } = req.body;
+      const { type, input, parameters } = req.body;
+      console.log('createTask params:', { type, input, parameters });
+      let parsedInput = input;
+      let parsedParams = parameters;
+      if (typeof parsedInput === 'string') parsedInput = JSON.parse(parsedInput);
+      if (typeof parsedParams === 'string') parsedParams = JSON.parse(parsedParams);
 
-      // 参数验证：OSS方式或URL方式二选一
-      if ((!ossObjectKey || !ossBucket) && !fileUrl) {
-        return res.status(400).json({
-          success: false,
-          message: '缺少必要参数：需要提供OSS信息(ossObjectKey和ossBucket)或fileUrl'
-        });
-      }
+      const taskOptions = {
+        type: type || 'offline',
+        input: { ...parsedInput },
+        parameters: parsedParams
+      };
+      console.log('taskOptions', taskOptions);
 
-      // 调用通义听悟服务创建任务
-      const result = await tingwuService.createTranscriptionTask({
-        ossObjectKey,
-        ossBucket,
-        name,
-        vocabularyId,
-        fileUrl,
-        taskKey,
-        sourceLanguage,
-        type: type || 'offline'
-      });
-
-      console.log("result1111", result);
-
+      const result = await transcriptionService.uploadAndTranscribe(taskOptions);
+      console.log('createTask result', result);
       return res.status(200).json({
         success: true,
-        message: '转录任务创建成功',
+        message: '创建转录任务成功',
         data: result
       });
     } catch (error) {
