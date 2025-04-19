@@ -96,6 +96,12 @@ app.use((err, req, res, next) => {
   });
 });
 
+// 全局错误处理中间件
+app.use((err, req, res, next) => {
+  logger.error('全局错误捕获:', err);
+  res.status(err.status || 500).json({ success: false, message: err.message || '服务器内部错误' });
+});
+
 // 处理未捕获的异常
 process.on('uncaughtException', (err) => {
   logger.error('未捕获的异常:', err);
