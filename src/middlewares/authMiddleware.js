@@ -1,4 +1,6 @@
-import AuthController from '../controllers/authController.js';
+// 认证相关中间件，包括用户身份验证和权限控制
+
+import authController from '../controllers/authController.js';
 import createLogger from '../utils/logger.js';
 
 const logger = createLogger('AuthMiddleware');
@@ -26,7 +28,7 @@ export function authenticate(req, res, next) {
     const token = authHeader.split(' ')[1];
     
     // 验证令牌
-    const decoded = AuthController.verifyToken(token);
+    const decoded = authController.verifyToken(token);
     
     if (!decoded) {
       logger.warn('无效的Authorization令牌');
@@ -89,4 +91,4 @@ export function authorize(roles) {
       });
     }
   };
-} 
+}

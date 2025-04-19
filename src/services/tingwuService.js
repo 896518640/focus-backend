@@ -4,24 +4,41 @@
 import Tingwu from '@alicloud/tingwu20230930';
 import * as OpenApi from '@alicloud/openapi-client';
 import * as Util from '@alicloud/tea-util';
-import dotenv from 'dotenv';
-
-dotenv.config();
+import BaseService from './BaseService.js';
+import configService from '../config/configService.js';
+import { ConfigError, AppError, ServiceError } from '../utils/errors.js';
+import cacheService from './cacheService.js';
 
 /**
  * 通义听悟服务类
  * 封装通义听悟API的调用方法
  */
-class TingwuService {
+class TingwuService extends BaseService {
   constructor() {
-    // 检查必要的环境变量
-    if (!process.env.ALIYUN_ACCESS_KEY_ID || !process.env.ALIYUN_ACCESS_KEY_SECRET) {
-      throw new Error('缺少阿里云AccessKey配置，请在.env文件中设置ALIYUN_ACCESS_KEY_ID和ALIYUN_ACCESS_KEY_SECRET');
+    super('TingwuService');
+    
+    // 检查必要的配置项
+    try {
+      const requiredConfig = ['aliyun.accessKeyId', 'aliyun.accessKeySecret'];
+      const validation = configService.validateRequiredConfig(requiredConfig);
+      
+      if (!validation.isValid) {
+        throw new ConfigError(
+          `缺少阿里云AccessKey配置: ${validation.missingKeys.join(', ')}`,
+          500,
+          { missingKeys: validation.missingKeys }
+        );
+      }
+    } catch (error) {
+      this.logger.error('初始化配置错误', error);
+      throw error;
     }
     
     // 初始化通义听悟SDK客户端
     this.client = this.createClient();
-    this.appKey = process.env.ALIYUN_TINGWU_APP_KEY || 'ZuTDHhX19DqHnIut';
+    this.appKey = configService.get('aliyun.tingwu.appKey', 'ZuTDHhX19DqHnIut');
+    
+    this.logger.info('通义听悟服务已初始化');
   }
 
   /**
@@ -32,17 +49,17 @@ class TingwuService {
     // 配置阿里云OpenAPI客户端
     const config = new OpenApi.Config({
       // 您的AccessKey ID
-      accessKeyId: process.env.ALIYUN_ACCESS_KEY_ID,
+      accessKeyId: configService.get('aliyun.accessKeyId'),
       // 您的AccessKey Secret
-      accessKeySecret: process.env.ALIYUN_ACCESS_KEY_SECRET,
+      accessKeySecret: configService.get('aliyun.accessKeySecret'),
       // 访问的区域ID
-      regionId: "cn-beijing",
+      regionId: configService.get('aliyun.tingwu.regionId', 'cn-beijing'),
       // 访问的域名
-      endpoint: "tingwu.cn-beijing.aliyuncs.com"  // 根据官方示例调整为北京区域
+      endpoint: configService.get('aliyun.tingwu.endpoint', 'tingwu.cn-beijing.aliyuncs.com')
     });
     
     // 创建通义听悟客户端实例
-    return new Tingwu.default(config)
+    return new Tingwu.default(config);
   }
 
   /**
@@ -58,12 +75,21 @@ class TingwuService {
    * @returns {Promise<Object>} 任务创建结果
    */
   async createTranscriptionTask(options) {
-    try {
+    return this.executeWithErrorHandling(async () => {
       // 检查必要参数
       if (!options.input.fileUrl) {
-        throw new Error('缺少必要参数：需要提供文件URL或OSS对象信息');
+        throw new AppError('缺少必要参数：需要提供文件URL或OSS对象信息', 400);
       }
 
+      // 检查是否有缓存的相似任务
+      const fileUrl = options.input.fileUrl;
+      const cacheKey = `tingwu:task:${this.hashString(fileUrl)}`;
+      const cachedTask = cacheService.get(cacheKey);
+      
+      if (cachedTask) {
+        this.logger.info(`找到缓存的转录任务: ${cachedTask.taskId}`);
+        return cachedTask;
+      }
 
       // 创建input对象
       const input = new Tingwu.CreateTaskRequestInput({
@@ -74,14 +100,14 @@ class TingwuService {
         ...options.parameters
       });
 
-      // 2. 创建CreateTaskRequest对象
+      // 创建CreateTaskRequest对象
       const createTaskRequest = new Tingwu.CreateTaskRequest({
-          appKey: this.appKey,
-          input: input,
-          parameters: parameters
+        appKey: this.appKey,
+        input: input,
+        parameters: parameters
       });
 
-      console.log("createTaskRequest", createTaskRequest);
+      this.logger.debug("创建任务请求对象", createTaskRequest);
 
       createTaskRequest.type = options.type || 'offline';
       
@@ -89,19 +115,36 @@ class TingwuService {
       const runtime = new Util.RuntimeOptions({});
       const headers = {};
       
-      console.log("官方风格createTaskRequest:", JSON.stringify(createTaskRequest, null, 2));
+      this.logger.debug("转录任务请求详情:", JSON.stringify(createTaskRequest, null, 2));
       
-      // 调用API创建任务
-      const response = await this.client.createTaskWithOptions(createTaskRequest, headers, runtime);
-      console.log("成功创建通义听悟任务:", response.body);
-      return response.body;
-    } catch (error) {
-      console.error("创建通义听悟任务失败:", error.message);
-      if (error.data && error.data.Recommend) {
-        console.error("诊断信息:", error.data.Recommend);
+      try {
+        // 调用API创建任务
+        const response = await this.client.createTaskWithOptions(createTaskRequest, headers, runtime);
+        this.logger.info("成功创建通义听悟任务:", response.body);
+        
+        // 缓存任务结果，保留1小时
+        if (response.body.code === '0') {
+          const taskResult = {
+            taskId: response.body.data.taskId,
+            taskStatus: response.body.data.taskStatus,
+            fileUrl,
+            createdAt: new Date().toISOString()
+          };
+          cacheService.set(cacheKey, taskResult, 60 * 60 * 1000); // 1小时
+          
+          // 也以任务ID为键缓存
+          cacheService.set(`tingwu:taskId:${response.body.data.taskId}`, taskResult, 60 * 60 * 1000);
+        }
+        
+        return response.body;
+      } catch (error) {
+        this.logger.error("创建通义听悟任务失败:", error);
+        throw new ServiceError(`创建转录任务失败: ${error.message}`, 500, {
+          originalError: error,
+          options
+        });
       }
-      throw error;
-    }
+    }, [], "创建通义听悟任务失败");
   }
 
   /**
@@ -110,28 +153,42 @@ class TingwuService {
    * @returns {Promise<Object>} 任务状态和结果
    */
   async getTaskResult(taskId) {
-    try {
+    return this.executeWithErrorHandling(async () => {
       // 参数验证
-      if (!taskId) {
-        throw new Error('taskId是必需的参数');
+      this.validateRequiredParams({ taskId }, ['taskId']);
+      
+      // 检查缓存中是否有完成的任务结果
+      const cacheKey = `tingwu:result:${taskId}`;
+      const cachedResult = cacheService.get(cacheKey);
+      
+      if (cachedResult && cachedResult.data?.taskStatus === 'COMPLETED') {
+        this.logger.info(`使用缓存的任务结果: ${taskId}`);
+        return cachedResult;
       }
       
-      // 3. 设置运行时选项和请求头
+      // 设置运行时选项和请求头
       const runtime = new Util.RuntimeOptions({});
       const headers = {};
       
-      
-      // 4. 调用API获取任务信息
-      const response = await this.client.getTaskInfoWithOptions(taskId, headers, runtime);
-      console.log("成功获取通义听悟任务结果:", response.body);
-      return response.body;
-    } catch (error) {
-      console.error("获取通义听悟任务结果失败:", error.message);
-      if (error.data && error.data.Recommend) {
-        console.error("诊断信息:", error.data.Recommend);
+      try {
+        // 调用API获取任务信息
+        const response = await this.client.getTaskInfoWithOptions(taskId, headers, runtime);
+        this.logger.info("成功获取通义听悟任务结果:", response.body);
+        
+        // 如果任务完成，缓存结果（保留24小时）
+        if (response.body.data?.taskStatus === 'COMPLETED') {
+          cacheService.set(cacheKey, response.body, 24 * 60 * 60 * 1000); // 24小时
+        }
+        
+        return response.body;
+      } catch (error) {
+        this.logger.error("获取通义听悟任务结果失败:", error);
+        throw new ServiceError(`获取任务结果失败: ${error.message}`, 500, {
+          originalError: error,
+          taskId
+        });
       }
-      throw error;
-    }
+    }, [], "获取通义听悟任务结果失败");
   }
 
   /**
@@ -142,7 +199,19 @@ class TingwuService {
    * @returns {Promise<Object>} 创建结果
    */
   async createVocabulary(options) {
-    try {
+    return this.executeWithErrorHandling(async () => {
+      // 参数验证
+      this.validateRequiredParams(options, ['name', 'words']);
+      
+      // 检查缓存中是否已存在相同的热词表
+      const cacheKey = `tingwu:vocabulary:${options.name}`;
+      const cachedVocabulary = cacheService.get(cacheKey);
+      
+      if (cachedVocabulary) {
+        this.logger.info(`使用缓存的热词表: ${options.name}`);
+        return cachedVocabulary;
+      }
+      
       // 构建请求
       const createRequest = new Tingwu.CreateTranscriptionPhrasesRequest({
         name: options.name,
@@ -153,17 +222,38 @@ class TingwuService {
       const runtime = new Util.RuntimeOptions({});
       const headers = {};
       
-      // 调用API创建热词表
-      const response = await this.client.createTranscriptionPhrasesWithOptions(createRequest, headers, runtime);
-      console.log("成功创建热词表:", response.body);
-      return response.body;
-    } catch (error) {
-      console.error("创建热词表失败:", error.message);
-      if (error.data && error.data.Recommend) {
-        console.error("诊断信息:", error.data.Recommend);
+      try {
+        // 调用API创建热词表
+        const response = await this.client.createTranscriptionPhrasesWithOptions(createRequest, headers, runtime);
+        this.logger.info("成功创建热词表:", response.body);
+        
+        // 缓存热词表（保留7天）
+        cacheService.set(cacheKey, response.body, 7 * 24 * 60 * 60 * 1000); // 7天
+        
+        return response.body;
+      } catch (error) {
+        this.logger.error("创建热词表失败:", error);
+        throw new ServiceError(`创建热词表失败: ${error.message}`, 500, {
+          originalError: error,
+          options
+        });
       }
-      throw error;
+    }, [], "创建热词表失败");
+  }
+  
+  /**
+   * 计算字符串的简单哈希值
+   * @param {string} str - 输入字符串
+   * @returns {string} 哈希值
+   */
+  hashString(str) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      const char = str.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // 转换为32位整数
     }
+    return hash.toString(16);
   }
 }
 

@@ -1,0 +1,1220 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Focus API 文档",
+    "version": "1.0.0",
+    "description": "Focus项目API接口文档",
+    "contact": {
+      "name": "Focus开发团队"
+    }
+  },
+  "servers": [
+    {
+      "url": "/api/v1",
+      "description": "API V1 - 开发环境"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "TranscriptionTask": {
+        "type": "object",
+        "required": [
+          "type",
+          "input"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "offline"
+            ],
+            "description": "转录任务类型，目前支持离线转录"
+          },
+          "input": {
+            "type": "object",
+            "properties": {
+              "sourceLanguage": {
+                "type": "string",
+                "enum": [
+                  "cn",
+                  "en"
+                ],
+                "description": "音频源语言，cn为中文，en为英文"
+              },
+              "fileUrl": {
+                "type": "string",
+                "description": "音频文件URL"
+              }
+            }
+          },
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "transcription": {
+                "type": "object",
+                "properties": {
+                  "diarizationEnabled": {
+                    "type": "boolean",
+                    "description": "是否启用说话人分离"
+                  },
+                  "diarization": {
+                    "type": "object",
+                    "properties": {
+                      "speakerCount": {
+                        "type": "integer",
+                        "description": "说话人数量"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "通义听悟",
+      "description": "音频转录相关API"
+    },
+    {
+      "name": "用户管理",
+      "description": "用户账户管理API"
+    },
+    {
+      "name": "认证",
+      "description": "用户登录和认证API"
+    }
+  ],
+  "paths": {
+    "/tingwu/upload": {
+      "post": {
+        "summary": "上传音频文件",
+        "description": "上传音频文件并返回文件的URL，用于后续转录",
+        "tags": [
+          "通义听悟"
+        ],
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "audio": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "音频文件（MP3、WAV等格式）"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "文件上传成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "文件上传成功"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "fileName": {
+                          "type": "string"
+                        },
+                        "fileUrl": {
+                          "type": "string"
+                        },
+                        "size": {
+                          "type": "number"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求无效，可能是缺少文件"
+          },
+          "500": {
+            "description": "服务器错误"
+          }
+        }
+      }
+    },
+    "/tingwu/tasks": {
+      "post": {
+        "summary": "创建转录任务",
+        "description": "创建音频转录任务，支持离线转录",
+        "tags": [
+          "通义听悟"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TranscriptionTask"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "转录任务创建成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "创建转录任务成功"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "taskId": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "无效的请求参数"
+          },
+          "500": {
+            "description": "服务器错误"
+          }
+        }
+      }
+    },
+    "/tingwu/tasks/{taskId}": {
+      "get": {
+        "summary": "获取任务状态和结果",
+        "description": "根据任务ID获取转录任务的状态和结果",
+        "tags": [
+          "通义听悟"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "taskId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "转录任务ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功获取任务信息",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "获取任务信息成功"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "taskId": {
+                          "type": "string"
+                        },
+                        "taskStatus": {
+                          "type": "string",
+                          "enum": [
+                            "ONGOING",
+                            "COMPLETED",
+                            "FAILED"
+                          ]
+                        },
+                        "result": {
+                          "type": "object",
+                          "properties": {
+                            "transcription": {
+                              "type": "string",
+                              "description": "转录结果URL"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求无效，可能是缺少taskId"
+          },
+          "500": {
+            "description": "服务器错误"
+          }
+        }
+      }
+    },
+    "/tingwu/tasks/{taskId}/poll": {
+      "get": {
+        "summary": "轮询任务结果直到完成",
+        "description": "持续轮询任务状态直到任务完成或失败",
+        "tags": [
+          "通义听悟"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "taskId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "转录任务ID"
+          },
+          {
+            "in": "query",
+            "name": "maxAttempts",
+            "schema": {
+              "type": "integer",
+              "default": 30
+            },
+            "description": "最大轮询次数"
+          },
+          {
+            "in": "query",
+            "name": "interval",
+            "schema": {
+              "type": "integer",
+              "default": 3000
+            },
+            "description": "轮询间隔(毫秒)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "转录任务完成",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "转录任务完成"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "taskId": {
+                          "type": "string"
+                        },
+                        "taskStatus": {
+                          "type": "string"
+                        },
+                        "transcription": {
+                          "type": "string",
+                          "description": "转录结果URL"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求无效，可能是缺少taskId"
+          },
+          "500": {
+            "description": "服务器错误"
+          }
+        }
+      }
+    },
+    "/tingwu/fetch-json": {
+      "post": {
+        "summary": "获取JSON文件内容",
+        "description": "从指定URL获取JSON文件内容",
+        "tags": [
+          "通义听悟"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "url"
+                ],
+                "properties": {
+                  "url": {
+                    "type": "string",
+                    "description": "JSON文件的URL"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功获取JSON文件内容",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "获取JSON文件内容成功"
+                    },
+                    "data": {
+                      "type": "object",
+                      "description": "获取到的JSON数据"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求无效，可能是缺少URL"
+          },
+          "500": {
+            "description": "服务器错误"
+          }
+        }
+      }
+    },
+    "/tingwu/vocabularies": {
+      "post": {
+        "summary": "创建热词表",
+        "description": "创建用于语音识别的热词表",
+        "tags": [
+          "通义听悟"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "words"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "热词表名称"
+                  },
+                  "words": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "热词列表"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "热词表创建成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "热词表创建成功"
+                    },
+                    "data": {
+                      "type": "object",
+                      "description": "创建结果"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求无效，可能是缺少必要参数"
+          },
+          "500": {
+            "description": "服务器错误"
+          }
+        }
+      }
+    },
+    "/api/user/profile": {
+      "get": {
+        "summary": "获取用户个人资料",
+        "description": "获取当前登录用户的详细个人资料，包括基本信息、会员状态、使用统计和最近活动",
+        "tags": [
+          "用户管理"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功获取用户资料",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "获取用户资料成功"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "example": 1
+                        },
+                        "username": {
+                          "type": "string",
+                          "example": "user123"
+                        },
+                        "email": {
+                          "type": "string",
+                          "example": "user@example.com"
+                        },
+                        "avatar": {
+                          "type": "string",
+                          "example": "https://example.com/avatar.png"
+                        },
+                        "role": {
+                          "type": "string",
+                          "example": "user"
+                        },
+                        "isActive": {
+                          "type": "boolean",
+                          "example": true
+                        },
+                        "createdAt": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "membership": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "premium"
+                            },
+                            "isActive": {
+                              "type": "boolean",
+                              "example": true
+                            },
+                            "startDate": {
+                              "type": "string",
+                              "format": "date-time"
+                            },
+                            "endDate": {
+                              "type": "string",
+                              "format": "date-time"
+                            }
+                          }
+                        },
+                        "usageStats": {
+                          "type": "object",
+                          "properties": {
+                            "studyHours": {
+                              "type": "number",
+                              "example": 10.5
+                            },
+                            "recognitionCount": {
+                              "type": "integer",
+                              "example": 25
+                            },
+                            "fileCount": {
+                              "type": "integer",
+                              "example": 15
+                            },
+                            "translationCount": {
+                              "type": "integer",
+                              "example": 30
+                            },
+                            "summaryCount": {
+                              "type": "integer",
+                              "example": 20
+                            }
+                          }
+                        },
+                        "settings": {
+                          "type": "object",
+                          "properties": {
+                            "defaultSourceLanguage": {
+                              "type": "string",
+                              "example": "zh_cn"
+                            },
+                            "defaultTargetLanguage": {
+                              "type": "string",
+                              "example": "en_us"
+                            },
+                            "autoTranslate": {
+                              "type": "boolean",
+                              "example": true
+                            },
+                            "autoSpeak": {
+                              "type": "boolean",
+                              "example": false
+                            },
+                            "speechRate": {
+                              "type": "number",
+                              "example": 1
+                            },
+                            "theme": {
+                              "type": "string",
+                              "example": "system"
+                            }
+                          }
+                        },
+                        "activities": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer",
+                                "example": 1
+                              },
+                              "title": {
+                                "type": "string",
+                                "example": "上传了音频文件"
+                              },
+                              "description": {
+                                "type": "string",
+                                "example": "用户上传了一个音频文件进行转写"
+                              },
+                              "type": {
+                                "type": "string",
+                                "example": "upload"
+                              },
+                              "icon": {
+                                "type": "string",
+                                "example": "upload"
+                              },
+                              "iconBg": {
+                                "type": "string",
+                                "example": null
+                              },
+                              "createdAt": {
+                                "type": "string",
+                                "format": "date-time"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "未授权，需要登录"
+          },
+          "404": {
+            "description": "用户不存在"
+          },
+          "500": {
+            "description": "服务器错误"
+          }
+        }
+      },
+      "put": {
+        "summary": "更新用户个人资料",
+        "description": "更新当前登录用户的基本个人资料信息",
+        "tags": [
+          "用户管理"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": {
+                    "type": "string",
+                    "description": "用户名",
+                    "example": "newUsername123"
+                  },
+                  "avatar": {
+                    "type": "string",
+                    "description": "头像URL",
+                    "example": "https://example.com/new-avatar.png"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功更新用户资料",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "更新用户资料成功"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "example": 1
+                        },
+                        "username": {
+                          "type": "string",
+                          "example": "newUsername123"
+                        },
+                        "avatar": {
+                          "type": "string",
+                          "example": "https://example.com/new-avatar.png"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "用户名已存在"
+          },
+          "401": {
+            "description": "未授权，需要登录"
+          },
+          "500": {
+            "description": "服务器错误"
+          }
+        }
+      }
+    },
+    "/api/user/activities": {
+      "get": {
+        "summary": "获取用户活动记录",
+        "description": "分页获取当前登录用户的活动记录",
+        "tags": [
+          "用户管理"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "页码，默认为1"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            },
+            "description": "每页条数，默认为10"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功获取活动记录",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "获取活动记录成功"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "activities": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer",
+                                "example": 1
+                              },
+                              "title": {
+                                "type": "string",
+                                "example": "上传了音频文件"
+                              },
+                              "description": {
+                                "type": "string",
+                                "example": "用户上传了一个音频文件进行转写"
+                              },
+                              "type": {
+                                "type": "string",
+                                "example": "upload"
+                              },
+                              "icon": {
+                                "type": "string",
+                                "example": "upload"
+                              },
+                              "iconBg": {
+                                "type": "string",
+                                "example": null
+                              },
+                              "createdAt": {
+                                "type": "string",
+                                "format": "date-time"
+                              }
+                            }
+                          }
+                        },
+                        "pagination": {
+                          "type": "object",
+                          "properties": {
+                            "page": {
+                              "type": "integer",
+                              "example": 1
+                            },
+                            "limit": {
+                              "type": "integer",
+                              "example": 10
+                            },
+                            "total": {
+                              "type": "integer",
+                              "example": 25
+                            },
+                            "pages": {
+                              "type": "integer",
+                              "example": 3
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "未授权，需要登录"
+          },
+          "500": {
+            "description": "服务器错误"
+          }
+        }
+      }
+    },
+    "/api/user/stats": {
+      "get": {
+        "summary": "获取用户使用统计",
+        "description": "获取当前登录用户的使用统计数据",
+        "tags": [
+          "用户管理"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功获取使用统计",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "获取使用统计成功"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "studyHours": {
+                          "type": "number",
+                          "example": 10.5
+                        },
+                        "recognitionCount": {
+                          "type": "integer",
+                          "example": 25
+                        },
+                        "fileCount": {
+                          "type": "integer",
+                          "example": 15
+                        },
+                        "translationCount": {
+                          "type": "integer",
+                          "example": 30
+                        },
+                        "summaryCount": {
+                          "type": "integer",
+                          "example": 20
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "未授权，需要登录"
+          },
+          "500": {
+            "description": "服务器错误"
+          }
+        }
+      }
+    },
+    "/api/user/settings": {
+      "put": {
+        "summary": "更新用户设置",
+        "description": "更新当前登录用户的应用设置",
+        "tags": [
+          "用户管理"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "defaultSourceLanguage": {
+                    "type": "string",
+                    "description": "默认源语言",
+                    "example": "zh_cn"
+                  },
+                  "defaultTargetLanguage": {
+                    "type": "string",
+                    "description": "默认目标语言",
+                    "example": "en_us"
+                  },
+                  "autoTranslate": {
+                    "type": "boolean",
+                    "description": "是否自动翻译",
+                    "example": true
+                  },
+                  "autoSpeak": {
+                    "type": "boolean",
+                    "description": "是否自动朗读",
+                    "example": false
+                  },
+                  "speechRate": {
+                    "type": "number",
+                    "description": "语音速率",
+                    "example": 1
+                  },
+                  "theme": {
+                    "type": "string",
+                    "description": "界面主题",
+                    "example": "dark"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功更新设置",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "更新设置成功"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "defaultSourceLanguage": {
+                          "type": "string",
+                          "example": "zh_cn"
+                        },
+                        "defaultTargetLanguage": {
+                          "type": "string",
+                          "example": "en_us"
+                        },
+                        "autoTranslate": {
+                          "type": "boolean",
+                          "example": true
+                        },
+                        "autoSpeak": {
+                          "type": "boolean",
+                          "example": false
+                        },
+                        "speechRate": {
+                          "type": "number",
+                          "example": 1
+                        },
+                        "theme": {
+                          "type": "string",
+                          "example": "dark"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "未授权，需要登录"
+          },
+          "500": {
+            "description": "服务器错误"
+          }
+        }
+      }
+    },
+    "/api/user/activity": {
+      "post": {
+        "summary": "记录用户活动",
+        "description": "为当前登录用户创建一条新的活动记录",
+        "tags": [
+          "用户管理"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "title",
+                  "type"
+                ],
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "description": "活动标题",
+                    "example": "上传了音频文件"
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "活动详细描述",
+                    "example": "用户上传了一个音频文件进行转写"
+                  },
+                  "type": {
+                    "type": "string",
+                    "description": "活动类型",
+                    "example": "upload"
+                  },
+                  "icon": {
+                    "type": "string",
+                    "description": "活动图标",
+                    "example": "upload"
+                  },
+                  "iconBg": {
+                    "type": "string",
+                    "description": "活动图标背景色",
+                    "example": "#4caf50"
+                  },
+                  "audioJobId": {
+                    "type": "string",
+                    "description": "关联的音频任务ID",
+                    "example": "job_123456"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功记录活动",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "记录活动成功"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "example": 1
+                        },
+                        "title": {
+                          "type": "string",
+                          "example": "上传了音频文件"
+                        },
+                        "description": {
+                          "type": "string",
+                          "example": "用户上传了一个音频文件进行转写"
+                        },
+                        "type": {
+                          "type": "string",
+                          "example": "upload"
+                        },
+                        "icon": {
+                          "type": "string",
+                          "example": "upload"
+                        },
+                        "iconBg": {
+                          "type": "string",
+                          "example": "#4caf50"
+                        },
+                        "userId": {
+                          "type": "integer",
+                          "example": 1
+                        },
+                        "audioJobId": {
+                          "type": "string",
+                          "example": "job_123456"
+                        },
+                        "createdAt": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "未授权，需要登录"
+          },
+          "500": {
+            "description": "服务器错误"
+          }
+        }
+      }
+    }
+  }
+}

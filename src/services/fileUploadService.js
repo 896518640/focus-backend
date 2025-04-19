@@ -5,35 +5,52 @@ import fs from 'fs';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import OSS from 'ali-oss';
-import dotenv from 'dotenv';
-
-dotenv.config();
+import BaseService from './BaseService.js';
+import configService from '../config/configService.js';
+import { ConfigError, AppError } from '../utils/errors.js';
+import cacheService from './cacheService.js';
 
 /**
  * 文件上传服务类
  * 负责处理文件上传到本地或OSS
  */
-class FileUploadService {
+class FileUploadService extends BaseService {
   constructor() {
-    // 检查必要的环境变量
-    if (!process.env.ALIYUN_ACCESS_KEY_ID || !process.env.ALIYUN_ACCESS_KEY_SECRET) {
-      throw new Error('缺少阿里云AccessKey配置，请在.env文件中设置ALIYUN_ACCESS_KEY_ID和ALIYUN_ACCESS_KEY_SECRET');
+    super('FileUploadService');
+    
+    // 检查必要的配置项
+    try {
+      const requiredConfig = ['aliyun.accessKeyId', 'aliyun.accessKeySecret'];
+      const validation = configService.validateRequiredConfig(requiredConfig);
+      
+      if (!validation.isValid) {
+        throw new ConfigError(
+          `缺少阿里云AccessKey配置: ${validation.missingKeys.join(', ')}`,
+          500,
+          { missingKeys: validation.missingKeys }
+        );
+      }
+    } catch (error) {
+      this.logger.error('初始化配置错误', error);
+      throw error;
     }
 
     // 初始化OSS客户端
     this.ossClient = this.createOssClient();
-    this.ossBucket = process.env.ALIYUN_OSS_BUCKET || 'focus-01';
+    this.ossBucket = configService.get('aliyun.oss.bucket', 'focus-01');
 
     // 是否使用本地文件
-    this.useLocalFiles = process.env.USE_LOCAL_FILES === 'true';
+    this.useLocalFiles = configService.get('storage.useLocalFiles', false);
 
     // 设置上传文件存储目录
-    this.uploadDir = path.join(process.cwd(), 'tmp', 'uploads');
+    this.uploadDir = configService.get('storage.uploadDir', path.join(process.cwd(), 'tmp', 'uploads'));
 
     // 确保上传目录存在
     if (!fs.existsSync(this.uploadDir)) {
       fs.mkdirSync(this.uploadDir, { recursive: true });
     }
+    
+    this.logger.info('文件上传服务已初始化');
   }
 
   /**
@@ -42,11 +59,11 @@ class FileUploadService {
    */
   createOssClient() {
     return new OSS({
-      region: process.env.ALIYUN_OSS_REGION || 'oss-cn-beijing',
-      accessKeyId: process.env.ALIYUN_ACCESS_KEY_ID,
-      accessKeySecret: process.env.ALIYUN_ACCESS_KEY_SECRET,
-      bucket: process.env.ALIYUN_OSS_BUCKET || 'focus-01',
-      timeout: 60000 // 超时时间: 60秒
+      region: configService.get('aliyun.oss.region', 'oss-cn-beijing'),
+      accessKeyId: configService.get('aliyun.accessKeyId'),
+      accessKeySecret: configService.get('aliyun.accessKeySecret'),
+      bucket: configService.get('aliyun.oss.bucket', 'focus-01'),
+      timeout: configService.get('aliyun.oss.timeout', 60000)
     });
   }
 
@@ -56,12 +73,17 @@ class FileUploadService {
    * @returns {Promise<Object>} 上传结果
    */
   async uploadFile(file) {
-    // 生成唯一文件名
-    const timestamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\..+/, '');
-    const fileName = `audio/${timestamp}-${uuidv4()}-${file.originalname}`;
-    const filePath = path.join(this.uploadDir, path.basename(fileName));
+    return this.executeWithErrorHandling(async () => {
+      // 参数验证
+      if (!file || !file.buffer) {
+        throw new AppError('无效的文件对象', 400);
+      }
+      
+      // 生成唯一文件名
+      const timestamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\..+/, '');
+      const fileName = `audio/${timestamp}-${uuidv4()}-${file.originalname}`;
+      const filePath = path.join(this.uploadDir, path.basename(fileName));
 
-    try {
       // 将文件写入本地目录
       await fs.promises.writeFile(filePath, file.buffer);
 
@@ -71,15 +93,23 @@ class FileUploadService {
       // 判断是否使用本地文件
       if (this.useLocalFiles) {
         // 使用本地文件URL
-        const baseUrl = process.env.NODE_ENV === 'production'
-          ? process.env.BASE_URL || `https://${process.env.HOST || 'localhost'}`
-          : `http://localhost:${process.env.PORT || 3000}`;
+        const baseUrl = configService.get('server.baseUrl', 
+          `http://localhost:${configService.get('server.port', 3000)}`);
 
         fileUrl = `${baseUrl}/uploads/${path.basename(fileName)}`;
-        console.log(`文件上传到本地成功: ${fileName}, URL: ${fileUrl}`);
+        this.logger.info(`文件上传到本地成功: ${fileName}, URL: ${fileUrl}`);
       } else {
         // 上传到OSS
         try {
+          // 检查缓存中是否有相同内容的文件
+          const fileHash = await this.calculateFileHash(file.buffer);
+          const cachedFile = cacheService.get(`file:${fileHash}`);
+          
+          if (cachedFile) {
+            this.logger.info(`文件内容已存在于缓存，重用现有URL: ${cachedFile.fileUrl}`);
+            return cachedFile;
+          }
+          
           // 设置文件的访问权限为公共读取
           const options = {
             headers: {
@@ -91,16 +121,30 @@ class FileUploadService {
           const result = await this.ossClient.put(fileName, filePath, options);
 
           // 构建可公开访问的URL
-          const region = process.env.ALIYUN_OSS_REGION || 'oss-cn-beijing';
+          const region = configService.get('aliyun.oss.region', 'oss-cn-beijing');
           const bucket = this.ossBucket;
           fileUrl = `https://${bucket}.${region}.aliyuncs.com/${fileName}`;
 
           ossObjectKey = fileName;
-          console.log("oss result:", JSON.stringify(result, null, 2));
-          console.log(`文件上传到OSS成功: ${fileName}, URL: ${fileUrl}`);
+          this.logger.info("OSS上传结果:", result);
+          this.logger.info(`文件上传到OSS成功: ${fileName}, URL: ${fileUrl}`);
+          
+          // 计算文件的MD5哈希值并缓存上传结果
+          const uploadResult = {
+            fileName: path.basename(fileName),
+            filePath,
+            fileUrl,
+            ossObjectKey,
+            ossBucket: this.ossBucket,
+            size: file.size,
+            mimeType: file.mimetype
+          };
+          
+          // 缓存文件信息，有效期24小时
+          cacheService.set(`file:${fileHash}`, uploadResult, 24 * 60 * 60 * 1000);
         } catch (ossError) {
-          console.error('OSS上传失败:', ossError);
-          throw new Error(`文件上传到OSS失败: ${ossError.message}`);
+          this.logger.error('OSS上传失败:', ossError);
+          throw new AppError(`文件上传到OSS失败: ${ossError.message}`, 500);
         }
       }
 
@@ -113,9 +157,33 @@ class FileUploadService {
         size: file.size,
         mimeType: file.mimetype
       };
+    }, [], '文件上传处理失败');
+  }
+  
+  /**
+   * 计算文件的哈希值
+   * @param {Buffer} buffer - 文件内容
+   * @returns {Promise<string>} 哈希值
+   */
+  async calculateFileHash(buffer) {
+    // 简单实现，实际项目中可以使用更好的哈希算法
+    const crypto = await import('crypto');
+    return crypto.createHash('md5').update(buffer).digest('hex');
+  }
+  
+  /**
+   * 根据URL获取文件名
+   * @param {string} url - 文件URL
+   * @returns {string} 文件名
+   */
+  getFileNameFromUrl(url) {
+    try {
+      const urlObj = new URL(url);
+      const pathName = urlObj.pathname;
+      return pathName.split('/').pop();
     } catch (error) {
-      console.error("文件上传处理失败:", error.message);
-      throw error;
+      this.logger.error('从URL解析文件名失败:', error);
+      return '';
     }
   }
 }

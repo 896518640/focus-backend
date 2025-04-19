@@ -4,10 +4,15 @@
 import express from 'express';
 import tingwuController from '../../controllers/tingwuController.js';
 import multer from 'multer';
-import asyncHandler from '../../utils/asyncHandler.js';
+import { createRouteHelper, registerRoutes } from '../../utils/routeHelper.js';
+import createLogger from '../../utils/logger.js';
 // import { authenticate } from '../../middlewares/authMiddleware.js';
 
+const logger = createLogger('TingwuRoutes');
 const router = express.Router();
+
+// 使用路由助手包装控制器方法
+const handler = createRouteHelper(tingwuController);
 
 // 配置文件上传中间件
 const upload = multer({
@@ -20,22 +25,50 @@ const upload = multer({
 // 开发测试阶段暂时禁用认证
 // router.use(authenticate);
 
-// 文件上传路由
-router.post('/upload', upload.single('audio'), asyncHandler(tingwuController.uploadFile));
+// 定义路由配置
+const routes = [
+  { 
+    path: '/upload', 
+    method: 'post', 
+    handler: handler.uploadFile, 
+    middlewares: [upload.single('audio')],
+    description: '上传音频文件'
+  },
+  { 
+    path: '/tasks', 
+    method: 'post', 
+    handler: handler.createTask,
+    description: '创建转写任务'
+  },
+  { 
+    path: '/tasks/:taskId', 
+    method: 'get', 
+    handler: handler.getTaskInfo,
+    description: '获取任务信息'
+  },
+  { 
+    path: '/tasks/:taskId/poll', 
+    method: 'get', 
+    handler: handler.pollTaskResult,
+    description: '轮询任务结果'
+  },
+  { 
+    path: '/fetch-json', 
+    method: 'post', 
+    handler: handler.fetchJsonContent,
+    description: '获取JSON内容'
+  },
+  { 
+    path: '/vocabularies', 
+    method: 'post', 
+    handler: handler.createVocabulary,
+    description: '创建词汇表'
+  }
+];
 
-// 创建听悟 任务
-router.post('/tasks', asyncHandler(tingwuController.createTask));
+// 批量注册路由
+registerRoutes(router, routes);
 
-// 查询听悟 状态
-router.get('/tasks/:taskId', asyncHandler(tingwuController.getTaskInfo));
-
-// 轮询听悟 任务结果
-router.get('/tasks/:taskId/poll', asyncHandler(tingwuController.pollTaskResult));
-
-// 获取JSON文件内容路由
-router.post('/fetch-json', asyncHandler(tingwuController.fetchJsonContent));
-
-// 创建热词表路由
-router.post('/vocabularies', asyncHandler(tingwuController.createVocabulary));
+logger.info('通义听悟路由模块已加载');
 
 export default router;

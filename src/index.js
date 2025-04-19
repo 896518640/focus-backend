@@ -7,6 +7,8 @@ import createLogger from './utils/logger.js';
 import apiV1Routes from './routes/v1/index.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import errorHandler from './middlewares/errorHandler.js';
+import { setupSwagger } from './utils/swagger.js';
 
 // 获取当前文件的目录路径
 const __filename = fileURLToPath(import.meta.url);
@@ -59,6 +61,12 @@ app.use((req, res, next) => {
 // 设置静态文件服务，用于访问上传的文件
 app.use('/uploads', express.static(path.join(process.cwd(), 'tmp', 'uploads')));
 
+// 配置Swagger API文档（仅在非生产环境中启用）
+if (process.env.NODE_ENV !== 'production') {
+  setupSwagger(app);
+  logger.info('API文档已启用，访问路径: /api-docs');
+}
+
 // 初始化控制器
 new SpeechController(io);
 
@@ -87,20 +95,8 @@ app.use((req, res) => {
   });
 });
 
-// 全局错误处理
-app.use((err, req, res, next) => {
-  logger.error(`服务器错误: ${err.message}`, err);
-  res.status(500).json({
-    code: 500,
-    message: '服务器内部错误'
-  });
-});
-
 // 全局错误处理中间件
-app.use((err, req, res, next) => {
-  logger.error('全局错误捕获:', err);
-  res.status(err.status || 500).json({ success: false, message: err.message || '服务器内部错误' });
-});
+app.use(errorHandler);
 
 // 处理未捕获的异常
 process.on('uncaughtException', (err) => {
@@ -116,6 +112,5 @@ const PORT = config.server.port;
 server.listen(PORT, () => {
   logger.info(`服务器已启动，端口: ${PORT}`);
   logger.info(`健康检查API: http://localhost:${PORT}/health`);
-  logger.info(`API基础路径: http://localhost:${PORT}/api/v1`);
-  logger.info(`通义听悟API: http://localhost:${PORT}/api/v1/tingwu`);
-}); 
+  logger.info(`API文档: http://localhost:${PORT}/api-docs`);
+});

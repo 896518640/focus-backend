@@ -1,18 +1,20 @@
+// speechController.js
+// 语音识别控制器，处理Socket.IO连接和语音识别会话
+
+import BaseController from './BaseController.js';
 import SpeechServiceFactory, { SpeechServiceType } from '../services/speech/SpeechServiceFactory.js';
 import { SpeechServiceError } from '../utils/errors.js';
-import createLogger from '../utils/logger.js';
-
-const logger = createLogger('SpeechController');
 
 /**
  * 处理Socket.IO连接和语音识别会话
  */
-export default class SpeechController {
+class SpeechController extends BaseController {
   /**
    * 初始化控制器
    * @param {Object} io - Socket.IO实例
    */
   constructor(io) {
+    super('SpeechController');
     this.io = io;
     this.setupSocketHandlers();
   }
@@ -22,17 +24,17 @@ export default class SpeechController {
    */
   setupSocketHandlers() {
     this.io.on('connection', (socket) => {
-      logger.info(`客户端已连接: ${socket.id}`);
+      this.logger.info(`客户端已连接: ${socket.id}`);
       
       // 保存当前的语音服务实例
       let speechService = null;
       
       // 开始新的录音会话
       socket.on('start-recording', (config) => {
-        logger.info('开始录音:', config);
+        this.logger.info('开始录音:', config);
         
         if (speechService) {
-          logger.warn('录音会话已经在运行中');
+          this.logger.warn('录音会话已经在运行中');
           socket.emit('warning', { message: '录音会话已经在运行中' });
           return;
         }
@@ -45,11 +47,11 @@ export default class SpeechController {
           speechService = SpeechServiceFactory.createService(serviceType, config);
           speechService.setSocket(socket);
           
-          logger.info(`语音识别会话已开始, 服务类型: ${serviceType}`);
+          this.logger.info(`语音识别会话已开始, 服务类型: ${serviceType}`);
           socket.emit('recording-started', { serviceType });
           
         } catch (err) {
-          logger.error('创建语音服务失败:', err);
+          this.logger.error('创建语音服务失败:', err);
           socket.emit('error', { 
             message: '初始化语音服务失败',
             details: err.message
@@ -60,7 +62,7 @@ export default class SpeechController {
       // 处理音频数据块
       socket.on('audio-chunk', (chunk) => {
         if (!speechService) {
-          logger.warn('收到音频数据但没有活动的语音服务实例');
+          this.logger.warn('收到音频数据但没有活动的语音服务实例');
           socket.emit('warning', { message: '请先启动录音会话' });
           return;
         }
@@ -68,7 +70,7 @@ export default class SpeechController {
         try {
           speechService.sendAudioChunk(chunk);
         } catch (err) {
-          logger.error('处理音频数据失败:', err);
+          this.logger.error('处理音频数据失败:', err);
           socket.emit('error', { 
             message: '处理音频数据失败',
             details: err.message
@@ -83,10 +85,10 @@ export default class SpeechController {
       
       // 结束录音会话
       socket.on('audio-end', () => {
-        logger.info('结束录音');
+        this.logger.info('结束录音');
         
         if (!speechService) {
-          logger.warn('收到结束录音指令但没有活动的语音服务实例');
+          this.logger.warn('收到结束录音指令但没有活动的语音服务实例');
           return;
         }
         
@@ -94,11 +96,11 @@ export default class SpeechController {
           speechService.endAudioStream();
           speechService = null;
           
-          logger.info('录音会话已结束');
+          this.logger.info('录音会话已结束');
           socket.emit('recording-ended');
           
         } catch (err) {
-          logger.error('结束录音会话失败:', err);
+          this.logger.error('结束录音会话失败:', err);
           socket.emit('error', { 
             message: '结束录音会话失败',
             details: err.message
@@ -109,13 +111,13 @@ export default class SpeechController {
       
       // 客户端断开连接
       socket.on('disconnect', () => {
-        logger.info(`客户端已断开连接: ${socket.id}`);
+        this.logger.info(`客户端已断开连接: ${socket.id}`);
         
         if (speechService) {
           try {
             speechService.endAudioStream();
           } catch (err) {
-            logger.error('客户端断开连接时清理资源失败:', err);
+            this.logger.error('客户端断开连接时清理资源失败:', err);
           } finally {
             speechService = null;
           }
@@ -123,4 +125,6 @@ export default class SpeechController {
       });
     });
   }
-} 
+}
+
+export default SpeechController;
