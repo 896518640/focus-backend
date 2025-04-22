@@ -240,7 +240,154 @@ class TingwuService extends BaseService {
       }
     }, [], "创建热词表失败");
   }
-  
+
+  /**
+   * 创建实时转录任务
+   * @param {Object} options - 实时转录任务配置
+   * @param {string} options.sourceLanguage - 音频源语言，如'cn'或'en'
+   * @param {string} options.format - 音频格式，如'pcm'、'opus'等
+   * @param {string} options.sampleRate - 采样率，如'16000'或'8000'
+   * @param {boolean} [options.translationEnabled] - 是否启用翻译
+   * @param {Array} [options.targetLanguages] - 目标翻译语言数组
+   * @returns {Promise<Object>} 任务创建结果
+   */
+  async createRealtimeTask(options) {
+    return this.executeWithErrorHandling(async () => {
+      // 参数验证
+      this.validateRequiredParams(options, ['sourceLanguage', 'format', 'sampleRate']);
+      
+      // 创建请求参数
+      const input = new Tingwu.CreateTaskRequestInput({
+        sourceLanguage: options.sourceLanguage,
+        format: options.format,
+        sampleRate: options.sampleRate,
+        taskKey: options.taskKey || `realtime-${Date.now()}`,
+      });
+
+      // 创建参数配置
+      const parameters = new Tingwu.CreateTaskRequestParameters({});
+      
+      // 设置转录参数
+      parameters.transcription = {
+        outputLevel: options.outputLevel || 2,  // 2表示返回中间结果
+        diarizationEnabled: options.diarizationEnabled || false
+      };
+      
+      // 如果启用说话人分离，设置说话人数量
+      if (options.diarizationEnabled && options.speakerCount) {
+        parameters.transcription.diarization = {
+          speakerCount: options.speakerCount
+        };
+      }
+      
+      // 如果启用翻译
+      if (options.translationEnabled) {
+        parameters.translationEnabled = true;
+        parameters.translation = {
+          outputLevel: options.outputLevel || 2,
+          targetLanguages: options.targetLanguages || ['cn']
+        };
+      }
+      
+      // 创建CreateTaskRequest对象
+      const createTaskRequest = new Tingwu.CreateTaskRequest({
+        appKey: this.appKey,
+        input: input,
+        parameters: parameters,
+        type: 'realtime'  // 设置为实时任务类型
+      });
+      
+      this.logger.info("创建实时任务请求对象", createTaskRequest);
+      
+      // 设置运行时选项和请求头
+      const runtime = new Util.RuntimeOptions({});
+      const headers = {};
+      
+      try {
+        // 调用API创建任务
+        const response = await this.client.createTaskWithOptions(createTaskRequest, headers, runtime);
+        this.logger.info("成功创建通义听悟实时任务:", response.body);
+        
+        // 缓存任务结果
+        if (response.body.code === '0') {
+          const taskResult = {
+            taskId: response.body.data.taskId,
+            taskStatus: response.body.data.taskStatus,
+            createdAt: new Date().toISOString()
+          };
+          
+          // 以任务ID为键缓存
+          cacheService.set(`tingwu:realtime:${response.body.data.taskId}`, taskResult, 24 * 60 * 60 * 1000); // 24小时
+        }
+        
+        return response.body;
+      } catch (error) {
+        this.logger.error("创建通义听悟实时任务失败:", error);
+        throw new ServiceError(`创建实时转录任务失败: ${error.message}`, 500, {
+          originalError: error,
+          options
+        });
+      }
+    }, [], "创建通义听悟实时任务失败");
+  }
+
+  /**
+   * 停止实时转录任务
+   * @param {string} taskId - 任务ID
+   * @returns {Promise<Object>} 停止任务结果
+   */
+  async stopRealtimeTask(taskId) {
+    return this.executeWithErrorHandling(async () => {
+      // 参数验证
+      this.validateRequiredParams({ taskId }, ['taskId']);
+      
+      // 获取缓存的任务信息
+      const cacheKey = `tingwu:realtime:${taskId}`;
+      const cachedTask = cacheService.get(cacheKey);
+      
+      if (!cachedTask) {
+        this.logger.warn(`未找到实时任务缓存: ${taskId}`);
+      }
+      
+      try {
+        // 设置运行时选项和请求头
+        const runtime = new Util.RuntimeOptions({});
+        const headers = {};
+        
+        // 根据API文档，正确构建停止任务请求
+        // 需要完整的请求结构，包括input对象
+        const createTaskRequest = new Tingwu.CreateTaskRequest({
+          appKey: this.appKey,
+          input: {
+            taskId: taskId // 在input中设置taskId
+          },
+          parameters: {}, // 需要提供空的parameters对象
+          type: 'realtime',
+          operation: 'stop' // 操作类型为停止
+        });
+        
+        this.logger.info("停止任务请求参数:", JSON.stringify(createTaskRequest, null, 2));
+        
+        // 调用API停止任务
+        const response = await this.client.createTaskWithOptions(createTaskRequest, headers, runtime);
+        this.logger.info("成功停止通义听悟实时任务:", response.body);
+        
+        // 清除任务缓存
+        if (cachedTask) {
+          cacheService.delete(cacheKey);
+        }
+        
+        return response.body;
+      } catch (error) {
+        this.logger.error("停止通义听悟实时任务失败:", error);
+        throw new ServiceError(`停止实时转录任务失败: ${error.message}`, 500, {
+          originalError: error,
+          taskId
+        });
+      }
+    }, [], "停止通义听悟实时任务失败");
+  }
+
   /**
    * 计算字符串的简单哈希值
    * @param {string} str - 输入字符串

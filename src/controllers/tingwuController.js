@@ -473,6 +473,277 @@ class TingwuController extends BaseController {
       return this.fail(res, '创建热词表失败', error, 500);
     }
   }
+
+  /**
+   * @swagger
+   * /tingwu/realtime/start:
+   *   post:
+   *     summary: 创建实时翻译任务
+   *     description: 创建一个实时语音识别和翻译任务，支持翻译功能
+   *     tags: [通义听悟]
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             required:
+   *               - sourceLanguage
+   *               - format
+   *               - sampleRate
+   *             properties:
+   *               sourceLanguage:
+   *                 type: string
+   *                 enum: [cn, en, multilingual]
+   *                 description: 音频源语言，cn为中文，en为英文
+   *               format:
+   *                 type: string
+   *                 enum: [pcm, opus, aac, speex, mp3]
+   *                 description: 音频流数据的编码格式
+   *               sampleRate:
+   *                 type: string
+   *                 enum: ['16000', '8000']
+   *                 description: 音频流数据的采样率
+   *               translationEnabled:
+   *                 type: boolean
+   *                 default: true
+   *                 description: 是否启用翻译功能
+   *               targetLanguages:
+   *                 type: array
+   *                 items:
+   *                   type: string
+   *                   enum: [cn, en, ja, ko, de, fr, ru]
+   *                 description: 目标翻译语言列表
+   *               diarizationEnabled:
+   *                 type: boolean
+   *                 default: false
+   *                 description: 是否启用说话人分离
+   *               speakerCount:
+   *                 type: integer
+   *                 description: 说话人数量，仅当启用说话人分离时有效
+   *     responses:
+   *       200:
+   *         description: 实时翻译任务创建成功
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 success:
+   *                   type: boolean
+   *                   example: true
+   *                 message:
+   *                   type: string
+   *                   example: 创建实时翻译任务成功
+   *                 data:
+   *                   type: object
+   *                   properties:
+   *                     taskId:
+   *                       type: string
+   *                     taskStatus:
+   *                       type: string
+   *       400:
+   *         description: 无效的请求参数
+   *       500:
+   *         description: 服务器错误
+   */
+  async startRealtimeTask(req, res) {
+    try {
+      this.logger.info('创建实时翻译任务，请求参数：', req.body);
+      
+      // 获取参数
+      const { 
+        sourceLanguage, 
+        format, 
+        sampleRate, 
+        translationEnabled = true, 
+        targetLanguages = ['cn'], 
+        diarizationEnabled = false, 
+        speakerCount
+      } = req.body;
+      
+      // 参数验证
+      if (!sourceLanguage || !format || !sampleRate) {
+        return this.fail(res, '缺少必要参数：sourceLanguage、format、sampleRate', null, 400);
+      }
+      
+      // 创建实时任务配置
+      const taskOptions = {
+        sourceLanguage,
+        format,
+        sampleRate,
+        translationEnabled,
+        targetLanguages,
+        diarizationEnabled,
+        speakerCount: diarizationEnabled ? (speakerCount || 2) : undefined,
+        outputLevel: 2 // 设置为2，表示返回中间结果
+      };
+      
+      // 调用服务创建实时任务
+      const result = await tingwuService.createRealtimeTask(taskOptions);
+      
+      this.logger.info('创建实时翻译任务结果 rrr:', result);
+      if (result.code === '0') {
+        return this.success(res, '创建实时翻译任务成功', {
+          taskId: result.data.taskId,
+          taskStatus: result.data.taskStatus,
+          taskKey: result.data.taskKey,
+          requestId: result.requestId,
+          meetingJoinUrl: result.data.meetingJoinUrl // meetingJoinUrl: "wss://tingwu-realtime-cn-beijing.aliyuncs.com/api/ws/v1?mc=6FloKJ2A5FpvudAL8NcU40Wj4PYPFHSqSh6UWmx8S2Ttv-5lvS-v9OqePlMENkIdTJgXwvC--jcX01_RHFNObp1pJcScCRbvCIPr1YlW6_3gWaYk2IfgFxg2uMosOhdV"
+        });
+      } else {
+        return this.fail(res, `创建实时翻译任务失败: ${result.message}`, null, 500);
+      }
+    } catch (error) {
+      this.logger.error('创建实时翻译任务失败:', error);
+      return this.fail(res, '创建实时翻译任务失败', error, 500);
+    }
+  }
+
+  /**
+   * @swagger
+   * /tingwu/realtime/{taskId}/stop:
+   *   post:
+   *     summary: 停止实时翻译任务
+   *     description: 停止指定的实时语音翻译任务
+   *     tags: [通义听悟]
+   *     parameters:
+   *       - in: path
+   *         name: taskId
+   *         required: true
+   *         schema:
+   *           type: string
+   *         description: 实时翻译任务ID
+   *     responses:
+   *       200:
+   *         description: 实时翻译任务停止成功
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 success:
+   *                   type: boolean
+   *                   example: true
+   *                 message:
+   *                   type: string
+   *                   example: 停止实时翻译任务成功
+   *                 data:
+   *                   type: object
+   *                   properties:
+   *                     taskId:
+   *                       type: string
+   *                     taskStatus:
+   *                       type: string
+   *       400:
+   *         description: 请求无效，可能是缺少taskId
+   *       500:
+   *         description: 服务器错误
+   */
+  async stopRealtimeTask(req, res) {
+    try {
+      const { taskId } = req.params;
+      
+      // 参数验证
+      if (!taskId) {
+        return this.fail(res, '缺少必要参数：taskId', null, 400);
+      }
+      
+      // 调用服务停止实时任务
+      const result = await tingwuService.stopRealtimeTask(taskId);
+      
+      if (result.code === '0') {
+        return this.success(res, '停止实时翻译任务成功', {
+          taskId,
+          taskStatus: 'STOPPED',
+          requestId: result.requestId
+        });
+      } else {
+        return this.fail(res, `停止实时翻译任务失败: ${result.message}`, null, 500);
+      }
+    } catch (error) {
+      this.logger.error('停止实时翻译任务失败:', error);
+      return this.fail(res, '停止实时翻译任务失败', error, 500);
+    }
+  }
+
+  /**
+   * @swagger
+   * /tingwu/realtime/websocket:
+   *   get:
+   *     summary: 获取WebSocket连接信息
+   *     description: 返回建立实时翻译WebSocket连接所需的相关信息
+   *     tags: [通义听悟]
+   *     parameters:
+   *       - in: query
+   *         name: taskId
+   *         required: true
+   *         schema:
+   *           type: string
+   *         description: 实时翻译任务ID
+   *     responses:
+   *       200:
+   *         description: 获取连接信息成功
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 success:
+   *                   type: boolean
+   *                   example: true
+   *                 message:
+   *                   type: string
+   *                   example: 获取WebSocket连接信息成功
+   *                 data:
+   *                   type: object
+   *                   properties:
+   *                     websocketUrl:
+   *                       type: string
+   *                       description: WebSocket连接地址
+   *                     taskId:
+   *                       type: string
+   *                     accessToken:
+   *                       type: string
+   *                       description: 建立连接所需的令牌
+   *       400:
+   *         description: 请求无效，可能是缺少taskId
+   *       500:
+   *         description: 服务器错误
+   */
+  async getWebSocketInfo(req, res) {
+    try {
+      const { taskId } = req.query;
+      
+      // 参数验证
+      if (!taskId) {
+        return this.fail(res, '缺少必要参数：taskId', null, 400);
+      }
+      
+      // 获取任务信息，确保任务存在
+      const taskInfo = await tingwuService.getTaskResult(taskId);
+      
+      if (!taskInfo || !taskInfo.data) {
+        return this.fail(res, `未找到任务: ${taskId}`, null, 404);
+      }
+      
+      // 生成访问令牌（可使用JWT或其他方式生成）
+      const accessToken = `token-${Date.now()}-${Math.floor(Math.random() * 1000000)}`;
+      
+      // 创建WebSocket连接信息（实际应用中应从通义听悟服务获取）
+      const websocketInfo = {
+        websocketUrl: `wss://tingwu.cn-beijing.aliyuncs.com/ws/${taskId}`,
+        taskId,
+        accessToken,
+        expiresIn: 3600 // 令牌过期时间（秒）
+      };
+      
+      return this.success(res, '获取WebSocket连接信息成功', websocketInfo);
+    } catch (error) {
+      this.logger.error('获取WebSocket连接信息失败:', error);
+      return this.fail(res, '获取WebSocket连接信息失败', error, 500);
+    }
+  }
 }
 
 export default new TingwuController();

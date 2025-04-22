@@ -63,6 +63,25 @@ const routes = [
     method: 'post', 
     handler: handler.createVocabulary,
     description: '创建词汇表'
+  },
+  // 以下是新增的实时翻译相关路由
+  { 
+    path: '/realtime/start', 
+    method: 'post', 
+    handler: handler.startRealtimeTask,
+    description: '创建实时翻译任务'
+  },
+  { 
+    path: '/realtime/:taskId/stop', 
+    method: 'post', 
+    handler: handler.stopRealtimeTask,
+    description: '停止实时翻译任务'
+  },
+  { 
+    path: '/realtime/websocket', 
+    method: 'get', 
+    handler: handler.getWebSocketInfo,
+    description: '获取WebSocket连接信息'
   }
 ];
 

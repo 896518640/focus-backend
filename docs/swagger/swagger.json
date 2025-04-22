@@ -512,6 +512,252 @@
         }
       }
     },
+    "/tingwu/realtime/start": {
+      "post": {
+        "summary": "创建实时翻译任务",
+        "description": "创建一个实时语音识别和翻译任务，支持翻译功能",
+        "tags": [
+          "通义听悟"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "sourceLanguage",
+                  "format",
+                  "sampleRate"
+                ],
+                "properties": {
+                  "sourceLanguage": {
+                    "type": "string",
+                    "enum": [
+                      "cn",
+                      "en",
+                      "multilingual"
+                    ],
+                    "description": "音频源语言，cn为中文，en为英文"
+                  },
+                  "format": {
+                    "type": "string",
+                    "enum": [
+                      "pcm",
+                      "opus",
+                      "aac",
+                      "speex",
+                      "mp3"
+                    ],
+                    "description": "音频流数据的编码格式"
+                  },
+                  "sampleRate": {
+                    "type": "string",
+                    "enum": [
+                      "16000",
+                      "8000"
+                    ],
+                    "description": "音频流数据的采样率"
+                  },
+                  "translationEnabled": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "是否启用翻译功能"
+                  },
+                  "targetLanguages": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "cn",
+                        "en",
+                        "ja",
+                        "ko",
+                        "de",
+                        "fr",
+                        "ru"
+                      ]
+                    },
+                    "description": "目标翻译语言列表"
+                  },
+                  "diarizationEnabled": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "是否启用说话人分离"
+                  },
+                  "speakerCount": {
+                    "type": "integer",
+                    "description": "说话人数量，仅当启用说话人分离时有效"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "实时翻译任务创建成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "创建实时翻译任务成功"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "taskId": {
+                          "type": "string"
+                        },
+                        "taskStatus": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "无效的请求参数"
+          },
+          "500": {
+            "description": "服务器错误"
+          }
+        }
+      }
+    },
+    "/tingwu/realtime/{taskId}/stop": {
+      "post": {
+        "summary": "停止实时翻译任务",
+        "description": "停止指定的实时语音翻译任务",
+        "tags": [
+          "通义听悟"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "taskId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "实时翻译任务ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "实时翻译任务停止成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "停止实时翻译任务成功"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "taskId": {
+                          "type": "string"
+                        },
+                        "taskStatus": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求无效，可能是缺少taskId"
+          },
+          "500": {
+            "description": "服务器错误"
+          }
+        }
+      }
+    },
+    "/tingwu/realtime/websocket": {
+      "get": {
+        "summary": "获取WebSocket连接信息",
+        "description": "返回建立实时翻译WebSocket连接所需的相关信息",
+        "tags": [
+          "通义听悟"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "taskId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "实时翻译任务ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "获取连接信息成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "获取WebSocket连接信息成功"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "websocketUrl": {
+                          "type": "string",
+                          "description": "WebSocket连接地址"
+                        },
+                        "taskId": {
+                          "type": "string"
+                        },
+                        "accessToken": {
+                          "type": "string",
+                          "description": "建立连接所需的令牌"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求无效，可能是缺少taskId"
+          },
+          "500": {
+            "description": "服务器错误"
+          }
+        }
+      }
+    },
     "/api/user/profile": {
       "get": {
         "summary": "获取用户个人资料",
