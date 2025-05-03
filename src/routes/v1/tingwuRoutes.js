@@ -78,6 +78,12 @@ const routes = [
     description: '停止实时翻译任务'
   },
   { 
+    path: '/realtime/:taskId/result', 
+    method: 'get', 
+    handler: handler.getRealtimeTaskResult,
+    description: '获取实时翻译任务结果'
+  },
+  { 
     path: '/realtime/websocket', 
     method: 'get', 
     handler: handler.getWebSocketInfo,

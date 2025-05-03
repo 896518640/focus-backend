@@ -8,56 +8,10 @@ import transcriptionService from '../services/transcriptionService.js';
 import axios from 'axios';
 
 /**
- * @swagger
- * tags:
- *   name: 通义听悟
- *   description: 音频识别与转录相关API
- */
-
-/**
- * @swagger
- * components:
- *   schemas:
- *     TranscriptionTask:
- *       type: object
- *       required:
- *         - type
- *         - input
- *       properties:
- *         type:
- *           type: string
- *           enum: [offline]
- *           description: 转录任务类型，目前支持离线转录
- *         input:
- *           type: object
- *           properties:
- *             sourceLanguage:
- *               type: string
- *               enum: [cn, en]
- *               description: 音频源语言，cn为中文，en为英文
- *             fileUrl:
- *               type: string
- *               description: 音频文件URL
- *         parameters:
- *           type: object
- *           properties:
- *             transcription:
- *               type: object
- *               properties:
- *                 diarizationEnabled:
- *                   type: boolean
- *                   description: 是否启用说话人分离
- *                 diarization:
- *                   type: object
- *                   properties:
- *                     speakerCount:
- *                       type: integer
- *                       description: 说话人数量
- */
-
-/**
  * 通义听悟控制器
  * 处理音频转录相关的HTTP请求
+ * 
+ * 所有API文档都移至 src/swagger 目录下
  */
 class TingwuController extends BaseController {
   constructor() {
@@ -65,52 +19,8 @@ class TingwuController extends BaseController {
   }
 
   /**
-   * @swagger
-   * /tingwu/upload:
-   *   post:
-   *     summary: 上传音频文件
-   *     description: 上传音频文件并返回文件的URL，用于后续转录
-   *     tags: [通义听悟]
-   *     consumes:
-   *       - multipart/form-data
-   *     requestBody:
-   *       required: true
-   *       content:
-   *         multipart/form-data:
-   *           schema:
-   *             type: object
-   *             properties:
-   *               audio:
-   *                 type: string
-   *                 format: binary
-   *                 description: 音频文件（MP3、WAV等格式）
-   *     responses:
-   *       200:
-   *         description: 文件上传成功
-   *         content:
-   *           application/json:
-   *             schema:
-   *               type: object
-   *               properties:
-   *                 success:
-   *                   type: boolean
-   *                   example: true
-   *                 message:
-   *                   type: string
-   *                   example: 文件上传成功
-   *                 data:
-   *                   type: object
-   *                   properties:
-   *                     fileName:
-   *                       type: string
-   *                     fileUrl:
-   *                       type: string
-   *                     size:
-   *                       type: number
-   *       400:
-   *         description: 请求无效，可能是缺少文件
-   *       500:
-   *         description: 服务器错误
+   * 上传音频文件
+   * @route POST /tingwu/upload
    */
   async uploadFile(req, res) {
     try {
@@ -129,43 +39,8 @@ class TingwuController extends BaseController {
   }
 
   /**
-   * @swagger
-   * /tingwu/tasks:
-   *   post:
-   *     summary: 创建转录任务
-   *     description: 创建音频转录任务，支持离线转录
-   *     tags: [通义听悟]
-   *     requestBody:
-   *       required: true
-   *       content:
-   *         application/json:
-   *           schema:
-   *             $ref: '#/components/schemas/TranscriptionTask'
-   *     responses:
-   *       200:
-   *         description: 转录任务创建成功
-   *         content:
-   *           application/json:
-   *             schema:
-   *               type: object
-   *               properties:
-   *                 success:
-   *                   type: boolean
-   *                   example: true
-   *                 message:
-   *                   type: string
-   *                   example: 创建转录任务成功
-   *                 data:
-   *                   type: object
-   *                   properties:
-   *                     taskId:
-   *                       type: string
-   *                     status:
-   *                       type: string
-   *       400:
-   *         description: 无效的请求参数
-   *       500:
-   *         description: 服务器错误
+   * 创建转录任务
+   * @route POST /tingwu/tasks
    */
   async createTask(req, res) {
     try {
@@ -194,51 +69,8 @@ class TingwuController extends BaseController {
   }
 
   /**
-   * @swagger
-   * /tingwu/tasks/{taskId}:
-   *   get:
-   *     summary: 获取任务状态和结果
-   *     description: 根据任务ID获取转录任务的状态和结果
-   *     tags: [通义听悟]
-   *     parameters:
-   *       - in: path
-   *         name: taskId
-   *         required: true
-   *         schema:
-   *           type: string
-   *         description: 转录任务ID
-   *     responses:
-   *       200:
-   *         description: 成功获取任务信息
-   *         content:
-   *           application/json:
-   *             schema:
-   *               type: object
-   *               properties:
-   *                 success:
-   *                   type: boolean
-   *                   example: true
-   *                 message:
-   *                   type: string
-   *                   example: 获取任务信息成功
-   *                 data:
-   *                   type: object
-   *                   properties:
-   *                     taskId:
-   *                       type: string
-   *                     taskStatus:
-   *                       type: string
-   *                       enum: [ONGOING, COMPLETED, FAILED]
-   *                     result:
-   *                       type: object
-   *                       properties:
-   *                         transcription:
-   *                           type: string
-   *                           description: 转录结果URL
-   *       400:
-   *         description: 请求无效，可能是缺少taskId
-   *       500:
-   *         description: 服务器错误
+   * 获取任务状态和结果
+   * @route GET /tingwu/tasks/{taskId}
    */
   async getTaskInfo(req, res) {
     try {
@@ -259,59 +91,8 @@ class TingwuController extends BaseController {
   }
 
   /**
-   * @swagger
-   * /tingwu/tasks/{taskId}/poll:
-   *   get:
-   *     summary: 轮询任务结果直到完成
-   *     description: 持续轮询任务状态直到任务完成或失败
-   *     tags: [通义听悟]
-   *     parameters:
-   *       - in: path
-   *         name: taskId
-   *         required: true
-   *         schema:
-   *           type: string
-   *         description: 转录任务ID
-   *       - in: query
-   *         name: maxAttempts
-   *         schema:
-   *           type: integer
-   *           default: 30
-   *         description: 最大轮询次数
-   *       - in: query
-   *         name: interval
-   *         schema:
-   *           type: integer
-   *           default: 3000
-   *         description: 轮询间隔(毫秒)
-   *     responses:
-   *       200:
-   *         description: 转录任务完成
-   *         content:
-   *           application/json:
-   *             schema:
-   *               type: object
-   *               properties:
-   *                 success:
-   *                   type: boolean
-   *                   example: true
-   *                 message:
-   *                   type: string
-   *                   example: 转录任务完成
-   *                 data:
-   *                   type: object
-   *                   properties:
-   *                     taskId:
-   *                       type: string
-   *                     taskStatus:
-   *                       type: string
-   *                     transcription:
-   *                       type: string
-   *                       description: 转录结果URL
-   *       400:
-   *         description: 请求无效，可能是缺少taskId
-   *       500:
-   *         description: 服务器错误
+   * 轮询任务结果直到完成
+   * @route GET /tingwu/tasks/{taskId}/poll
    */
   async pollTaskResult(req, res) {
     try {
@@ -347,45 +128,8 @@ class TingwuController extends BaseController {
   }
 
   /**
-   * @swagger
-   * /tingwu/fetch-json:
-   *   post:
-   *     summary: 获取JSON文件内容
-   *     description: 从指定URL获取JSON文件内容
-   *     tags: [通义听悟]
-   *     requestBody:
-   *       required: true
-   *       content:
-   *         application/json:
-   *           schema:
-   *             type: object
-   *             required:
-   *               - url
-   *             properties:
-   *               url:
-   *                 type: string
-   *                 description: JSON文件的URL
-   *     responses:
-   *       200:
-   *         description: 成功获取JSON文件内容
-   *         content:
-   *           application/json:
-   *             schema:
-   *               type: object
-   *               properties:
-   *                 success:
-   *                   type: boolean
-   *                   example: true
-   *                 message:
-   *                   type: string
-   *                   example: 获取JSON文件内容成功
-   *                 data:
-   *                   type: object
-   *                   description: 获取到的JSON数据
-   *       400:
-   *         description: 请求无效，可能是缺少URL
-   *       500:
-   *         description: 服务器错误
+   * 获取JSON文件内容
+   * @route POST /tingwu/fetch-json
    */
   async fetchJsonContent(req, res) {
     try {
@@ -406,51 +150,8 @@ class TingwuController extends BaseController {
   }
 
   /**
-   * @swagger
-   * /tingwu/vocabularies:
-   *   post:
-   *     summary: 创建热词表
-   *     description: 创建用于语音识别的热词表
-   *     tags: [通义听悟]
-   *     requestBody:
-   *       required: true
-   *       content:
-   *         application/json:
-   *           schema:
-   *             type: object
-   *             required:
-   *               - name
-   *               - words
-   *             properties:
-   *               name:
-   *                 type: string
-   *                 description: 热词表名称
-   *               words:
-   *                 type: array
-   *                 items:
-   *                   type: string
-   *                 description: 热词列表
-   *     responses:
-   *       200:
-   *         description: 热词表创建成功
-   *         content:
-   *           application/json:
-   *             schema:
-   *               type: object
-   *               properties:
-   *                 success:
-   *                   type: boolean
-   *                   example: true
-   *                 message:
-   *                   type: string
-   *                   example: 热词表创建成功
-   *                 data:
-   *                   type: object
-   *                   description: 创建结果
-   *       400:
-   *         description: 请求无效，可能是缺少必要参数
-   *       500:
-   *         description: 服务器错误
+   * 创建热词表
+   * @route POST /tingwu/vocabularies
    */
   async createVocabulary(req, res) {
     try {
@@ -475,91 +176,34 @@ class TingwuController extends BaseController {
   }
 
   /**
-   * @swagger
-   * /tingwu/realtime/start:
-   *   post:
-   *     summary: 创建实时翻译任务
-   *     description: 创建一个实时语音识别和翻译任务，支持翻译功能
-   *     tags: [通义听悟]
-   *     requestBody:
-   *       required: true
-   *       content:
-   *         application/json:
-   *           schema:
-   *             type: object
-   *             required:
-   *               - sourceLanguage
-   *               - format
-   *               - sampleRate
-   *             properties:
-   *               sourceLanguage:
-   *                 type: string
-   *                 enum: [cn, en, multilingual]
-   *                 description: 音频源语言，cn为中文，en为英文
-   *               format:
-   *                 type: string
-   *                 enum: [pcm, opus, aac, speex, mp3]
-   *                 description: 音频流数据的编码格式
-   *               sampleRate:
-   *                 type: string
-   *                 enum: ['16000', '8000']
-   *                 description: 音频流数据的采样率
-   *               translationEnabled:
-   *                 type: boolean
-   *                 default: true
-   *                 description: 是否启用翻译功能
-   *               targetLanguages:
-   *                 type: array
-   *                 items:
-   *                   type: string
-   *                   enum: [cn, en, ja, ko, de, fr, ru]
-   *                 description: 目标翻译语言列表
-   *               diarizationEnabled:
-   *                 type: boolean
-   *                 default: false
-   *                 description: 是否启用说话人分离
-   *               speakerCount:
-   *                 type: integer
-   *                 description: 说话人数量，仅当启用说话人分离时有效
-   *     responses:
-   *       200:
-   *         description: 实时翻译任务创建成功
-   *         content:
-   *           application/json:
-   *             schema:
-   *               type: object
-   *               properties:
-   *                 success:
-   *                   type: boolean
-   *                   example: true
-   *                 message:
-   *                   type: string
-   *                   example: 创建实时翻译任务成功
-   *                 data:
-   *                   type: object
-   *                   properties:
-   *                     taskId:
-   *                       type: string
-   *                     taskStatus:
-   *                       type: string
-   *       400:
-   *         description: 无效的请求参数
-   *       500:
-   *         description: 服务器错误
+   * 创建实时翻译任务
+   * @route POST /tingwu/realtime/start
    */
   async startRealtimeTask(req, res) {
     try {
       this.logger.info('创建实时翻译任务，请求参数：', req.body);
       
-      // 获取参数
+      // 获取基本参数
       const { 
         sourceLanguage, 
         format, 
         sampleRate, 
         translationEnabled = true, 
-        targetLanguages = ['cn'], 
+        targetLanguages = ['cn'],
+        languageHints,
         diarizationEnabled = false, 
         speakerCount
+      } = req.body;
+      
+      // 获取高级参数
+      const {
+        transcription = {},
+        translation = {},
+        autoChaptersEnabled = false,
+        summarizationEnabled = false,
+        summarization = {},
+        textPolishEnabled = false,
+        customPromptEnabled = false
       } = req.body;
       
       // 参数验证
@@ -569,27 +213,43 @@ class TingwuController extends BaseController {
       
       // 创建实时任务配置
       const taskOptions = {
+        // 基本参数
         sourceLanguage,
         format,
         sampleRate,
         translationEnabled,
         targetLanguages,
+        languageHints,
         diarizationEnabled,
         speakerCount: diarizationEnabled ? (speakerCount || 2) : undefined,
-        outputLevel: 2 // 设置为2，表示返回中间结果
+        
+        // 高级参数配置
+        // 转录参数
+        transcriptionOutputLevel: transcription.outputLevel || 2,
+        phraseId: transcription.phraseId,
+        
+        // 翻译参数
+        translationOutputLevel: translation.outputLevel || 2,
+        
+        // 额外功能
+        autoChaptersEnabled,
+        summarizationEnabled,
+        summarizationTypes: summarization.types,
+        textPolishEnabled,
+        customPromptEnabled
       };
       
       // 调用服务创建实时任务
       const result = await tingwuService.createRealtimeTask(taskOptions);
       
-      this.logger.info('创建实时翻译任务结果 rrr:', result);
+      this.logger.info('创建实时翻译任务结果:', result);
       if (result.code === '0') {
         return this.success(res, '创建实时翻译任务成功', {
           taskId: result.data.taskId,
           taskStatus: result.data.taskStatus,
           taskKey: result.data.taskKey,
           requestId: result.requestId,
-          meetingJoinUrl: result.data.meetingJoinUrl // meetingJoinUrl: "wss://tingwu-realtime-cn-beijing.aliyuncs.com/api/ws/v1?mc=6FloKJ2A5FpvudAL8NcU40Wj4PYPFHSqSh6UWmx8S2Ttv-5lvS-v9OqePlMENkIdTJgXwvC--jcX01_RHFNObp1pJcScCRbvCIPr1YlW6_3gWaYk2IfgFxg2uMosOhdV"
+          meetingJoinUrl: result.data.meetingJoinUrl
         });
       } else {
         return this.fail(res, `创建实时翻译任务失败: ${result.message}`, null, 500);
@@ -601,44 +261,8 @@ class TingwuController extends BaseController {
   }
 
   /**
-   * @swagger
-   * /tingwu/realtime/{taskId}/stop:
-   *   post:
-   *     summary: 停止实时翻译任务
-   *     description: 停止指定的实时语音翻译任务
-   *     tags: [通义听悟]
-   *     parameters:
-   *       - in: path
-   *         name: taskId
-   *         required: true
-   *         schema:
-   *           type: string
-   *         description: 实时翻译任务ID
-   *     responses:
-   *       200:
-   *         description: 实时翻译任务停止成功
-   *         content:
-   *           application/json:
-   *             schema:
-   *               type: object
-   *               properties:
-   *                 success:
-   *                   type: boolean
-   *                   example: true
-   *                 message:
-   *                   type: string
-   *                   example: 停止实时翻译任务成功
-   *                 data:
-   *                   type: object
-   *                   properties:
-   *                     taskId:
-   *                       type: string
-   *                     taskStatus:
-   *                       type: string
-   *       400:
-   *         description: 请求无效，可能是缺少taskId
-   *       500:
-   *         description: 服务器错误
+   * 停止实时翻译任务
+   * @route POST /tingwu/realtime/{taskId}/stop
    */
   async stopRealtimeTask(req, res) {
     try {
@@ -668,48 +292,8 @@ class TingwuController extends BaseController {
   }
 
   /**
-   * @swagger
-   * /tingwu/realtime/websocket:
-   *   get:
-   *     summary: 获取WebSocket连接信息
-   *     description: 返回建立实时翻译WebSocket连接所需的相关信息
-   *     tags: [通义听悟]
-   *     parameters:
-   *       - in: query
-   *         name: taskId
-   *         required: true
-   *         schema:
-   *           type: string
-   *         description: 实时翻译任务ID
-   *     responses:
-   *       200:
-   *         description: 获取连接信息成功
-   *         content:
-   *           application/json:
-   *             schema:
-   *               type: object
-   *               properties:
-   *                 success:
-   *                   type: boolean
-   *                   example: true
-   *                 message:
-   *                   type: string
-   *                   example: 获取WebSocket连接信息成功
-   *                 data:
-   *                   type: object
-   *                   properties:
-   *                     websocketUrl:
-   *                       type: string
-   *                       description: WebSocket连接地址
-   *                     taskId:
-   *                       type: string
-   *                     accessToken:
-   *                       type: string
-   *                       description: 建立连接所需的令牌
-   *       400:
-   *         description: 请求无效，可能是缺少taskId
-   *       500:
-   *         description: 服务器错误
+   * 获取WebSocket连接信息
+   * @route GET /tingwu/realtime/websocket
    */
   async getWebSocketInfo(req, res) {
     try {
@@ -742,6 +326,34 @@ class TingwuController extends BaseController {
     } catch (error) {
       this.logger.error('获取WebSocket连接信息失败:', error);
       return this.fail(res, '获取WebSocket连接信息失败', error, 500);
+    }
+  }
+  
+  /**
+   * 获取实时翻译任务结果
+   * @route GET /tingwu/realtime/{taskId}/result
+   */
+  async getRealtimeTaskResult(req, res) {
+    try {
+      const { taskId } = req.params;
+      
+      // 参数验证
+      if (!taskId) {
+        return this.fail(res, '缺少必要参数：taskId', null, 400);
+      }
+      
+      // 调用服务获取实时任务结果
+      const taskResult = await tingwuService.getRealtimeTaskResult(taskId);
+      
+      if (!taskResult) {
+        return this.fail(res, `未找到任务结果: ${taskId}`, null, 404);
+      }
+      
+      // 直接返回服务层处理好的结果
+      return this.success(res, '获取任务结果成功', taskResult);
+    } catch (error) {
+      this.logger.error('获取实时翻译任务结果失败:', error);
+      return this.fail(res, '获取实时翻译任务结果失败', error, 500);
     }
   }
 }

@@ -172,3 +172,45 @@ function endRecording() {
 ## 许可证
 
 ISC
+
+## 通义听悟API
+
+本项目提供了两种使用阿里云通义听悟API的方式：
+
+### 1. 完整版通义听悟API
+
+完整版API提供了丰富的功能，包括音频文件上传、转录任务管理、词汇表创建以及实时转录等功能。
+
+访问路径: `/api/v1/tingwu/...`
+
+### 2. 简化版通义听悟API (新增)
+
+简化版API只保留了通义听悟的两个核心接口，更加简洁和直接：
+
+- **创建任务**: `POST /api/v1/simple-tingwu/tasks`
+  - 直接对应通义听悟的 CreateTask API
+  - 参数完全透传，无额外封装
+  - 示例请求:
+    ```json
+    {
+      "type": "offline",
+      "input": {
+        "sourceLanguage": "cn",
+        "fileUrl": "https://example.com/sample.wav"
+      },
+      "parameters": {
+        "transcription": {
+          "diarizationEnabled": true
+        }
+      }
+    }
+    ```
+
+- **获取任务信息**: `GET /api/v1/simple-tingwu/tasks/:taskId`
+  - 直接对应通义听悟的 GetTaskInfo API
+  - 无额外处理，返回原始API响应
+  
+简化版API适合以下场景：
+- 需要直接使用通义听悟原生API，无需额外封装
+- 更关注API性能和响应速度
+- 希望对API请求和响应有完全控制权

@@ -1,0 +1,85 @@
+###
+POST  http://localhost:3000/api/v1/mainTingwu/tasks
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxN2Q5YTZiMy01N2Y5LTQyN2UtODUxMC02MTI4ODQ2OWJlOWIiLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDYxNzg1NjgsImV4cCI6MTc0NjI2NDk2OH0.Dy7hm0WhuE6p92DXcVL_8AmvuJVJkVONTp8BYpfFUEI
+
+{
+    "type": "offline",
+    "input": {
+         "fileUrl": "https://focus-01.oss-cn-beijing.aliyuncs.com/audio/20250503T080806-82831c36-8c59-4f71-a289-31f50b8906e9-500hz-107658.mp3",
+        "sourceLanguage": "cn"
+    },
+    "parameters": {
+        "translationEnabled": true,
+        "translation": {
+            "targetLanguages": ["en"],
+            "outputLevel": 2
+        }
+    }
+}
+
+# {
+#   "success": true,
+#   "message": "成功创建通义听悟任务",
+#   "data": {
+#     "taskId": "6e4b5a1de3184ca298755eb3821a7225",
+#     "taskStatus": "ONGOING",
+#     "requestId": "5D5368CE-93CA-5761-B71D-3A57AA1FDB6D"
+#   },
+#   "timestamp": "2025-05-03T07:46:11.287Z"
+# }
+
+# {
+#   "success": true,
+#   "message": "成功创建通义听悟任务",
+#   "data": {
+#     "taskId": "6e4b5a1de3184ca298755eb3821a7225",
+#     "taskStatus": "ONGOING",
+#     "requestId": "5D5368CE-93CA-5761-B71D-3A57AA1FDB6D"
+#   },
+#   "timestamp": "2025-05-03T07:46:11.287Z"
+# }
+
+
+
+###
+GET http://localhost:3000/api/v1/mainTingwu/tasks/e62c70c4e8bc4b2d805d8ac93cd9802c
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxN2Q5YTZiMy01N2Y5LTQyN2UtODUxMC02MTI4ODQ2OWJlOWIiLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDYxNzg1NjgsImV4cCI6MTc0NjI2NDk2OH0.Dy7hm0WhuE6p92DXcVL_8AmvuJVJkVONTp8BYpfFUEI
+
+# {
+#   "success": true,
+#   "message": "成功获取通义听悟任务信息",
+#   "data": {
+#     "code": "0",
+#     "data": {
+#       "result": {
+#         "autoChapters": "https://prod-tingwu-paas-common-beijing.oss-cn-beijing.aliyuncs.com/tingwu/output/1767782021063526/ed002fc205464995a7dc1f7aee3bb7eb/ed002fc205464995a7dc1f7aee3bb7eb_AutoChapters_20250503144225.json?Expires=1748846549&OSSAccessKeyId=LTAI5tMzZ1D4o1drkJN1TfCr&Signature=D1YpshUluVjg1v19qauDIdXtnTg%3D",
+#         "transcription": "https://prod-tingwu-paas-common-beijing.oss-cn-beijing.aliyuncs.com/tingwu/output/1767782021063526/ed002fc205464995a7dc1f7aee3bb7eb/ed002fc205464995a7dc1f7aee3bb7eb_Transcription_20250503144210.json?Expires=1748846549&OSSAccessKeyId=LTAI5tMzZ1D4o1drkJN1TfCr&Signature=GxzEVk7Jl0jyuwEff5QfZu%2B0rwg%3D"
+#       },
+#       "taskId": "ed002fc205464995a7dc1f7aee3bb7eb",
+#       "taskStatus": "COMPLETED"
+#     },
+#     "message": "success",
+#     "requestId": "2D0D4535-6E9B-5AD1-91F5-67B491094E7F"
+#   },
+#   "timestamp": "2025-05-03T06:42:29.603Z"
+# }
+
+# {
+#   "success": true,
+#   "message": "成功获取通义听悟任务信息",
+#   "data": {
+#     "taskId": "6e4b5a1de3184ca298755eb3821a7225",
+#     "taskStatus": "COMPLETED",
+#     "requestId": "092D775C-FF50-590C-BAD7-E7ADB320739E",
+#     "result": {
+#       "transcription": "https://prod-tingwu-paas-common-beijing.oss-cn-beijing.aliyuncs.com/tingwu/output/1767782021063526/6e4b5a1de3184ca298755eb3821a7225/6e4b5a1de3184ca298755eb3821a7225_Transcription_20250503154620.json?Expires=1748850418&OSSAccessKeyId=LTAI5tMzZ1D4o1drkJN1TfCr&Signature=KjM3MY25FPKKnbQuscK3XJrjXoE%3D",
+#       "translation": "https://prod-tingwu-paas-common-beijing.oss-cn-beijing.aliyuncs.com/tingwu/output/1767782021063526/6e4b5a1de3184ca298755eb3821a7225/6e4b5a1de3184ca298755eb3821a7225_Translation_20250503154621.json?Expires=1748850418&OSSAccessKeyId=LTAI5tMzZ1D4o1drkJN1TfCr&Signature=%2FWAVQzLBJlLbM9i0yti03S3uA%2F4%3D"
+#     }
+#   },
+#   "timestamp": "2025-05-03T07:46:58.763Z"
+# }
+
+
+

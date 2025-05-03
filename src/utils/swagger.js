@@ -1,12 +1,13 @@
 // swagger.js
 // Swagger/OpenAPI 文档生成工具
 
-import swaggerJsdoc from 'swagger-jsdoc';
+import swaggerJSDoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
 import { fileURLToPath } from 'url';
 import path from 'path';
 import fs from 'fs';
 import createLogger from './logger.js';
+import swaggerDefinition from '../swagger/index.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -16,60 +17,12 @@ const logger = createLogger('SwaggerUtil');
  * Swagger配置选项
  */
 const swaggerOptions = {
-  definition: {
-    openapi: '3.0.0',
-    info: {
-      title: 'Focus API 文档',
-      version: '1.0.0',
-      description: 'Focus项目API接口文档',
-      contact: {
-        name: 'Focus开发团队'
-      }
-    },
-    servers: [
-      {
-        url: '/api/v1',
-        description: 'API V1 - 开发环境'
-      }
-    ],
-    components: {
-      securitySchemes: {
-        bearerAuth: {
-          type: 'http',
-          scheme: 'bearer',
-          bearerFormat: 'JWT'
-        }
-      }
-    },
-    security: [
-      {
-        bearerAuth: []
-      }
-    ],
-    tags: [
-      {
-        name: '通义听悟',
-        description: '音频转录相关API'
-      },
-      {
-        name: '用户管理',
-        description: '用户账户管理API'
-      },
-      {
-        name: '认证',
-        description: '用户登录和认证API'
-      }
-    ]
-  },
-  // 扫描带有JSDoc注释的路由和控制器文件
-  apis: [
-    path.join(__dirname, '../routes/**/*.js'),
-    path.join(__dirname, '../controllers/**/*.js')
-  ]
+  definition: swaggerDefinition,
+  apis: [] // 使用已经定义好的文档，不需要扫描注释
 };
 
 // 生成Swagger规范
-const swaggerSpec = swaggerJsdoc(swaggerOptions);
+const swaggerSpec = swaggerJSDoc(swaggerOptions);
 
 /**
  * 在Express应用中设置Swagger UI
@@ -90,7 +43,7 @@ export const setupSwagger = (app) => {
     );
 
     // 提供Swagger JSON端点
-    app.get('/api-docs.json', (req, res) => {
+    app.get('/swagger.json', (req, res) => {
       res.setHeader('Content-Type', 'application/json');
       res.send(swaggerSpec);
     });
