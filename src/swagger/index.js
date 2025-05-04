@@ -5,6 +5,8 @@
 
 import tingwuSchemas from './schemas/tingwu.js';
 import tingwuPaths from './paths/tingwu.js';
+import translationSchemas from './schemas/translation.js';
+import translationPaths from './paths/translation.js';
 
 export default {
   openapi: '3.0.0',
@@ -17,16 +19,22 @@ export default {
     {
       name: '通义听悟',
       description: '音频识别与转录相关API'
+    },
+    {
+      name: '翻译管理',
+      description: '翻译记录管理相关API'
     }
     // 可以添加其他标签
   ],
   paths: {
     ...tingwuPaths,
+    ...translationPaths,
     // 其他路径可以在这里添加
   },
   components: {
     schemas: {
       ...tingwuSchemas,
+      ...translationSchemas,
       // 其他模型可以在这里添加
     }
   }

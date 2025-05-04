@@ -6,6 +6,7 @@ import authRoutes from './auth.js';
 import userRoutes from './user.js';
 // import tingwuRoutes from './tingwuRoutes.js';
 import mainTingwuRoutes from './mainTingwuRoutes.js';
+import translationRoutes from './translationRoutes.js';
 import createLogger from '../../utils/logger.js';
 import { authenticate } from '../../middlewares/authMiddleware.js';
 import authController from '../../controllers/authController.js';
@@ -25,7 +26,7 @@ router.use('/auth', authRoutes);
 router.use('/user', userRoutes);
 // router.use('/tingwu', tingwuRoutes);
 router.use('/tingwu', mainTingwuRoutes);
-
+router.use('/translation', translationRoutes);
 // 定义主路由配置
 const routes = [
   // 用户相关路由

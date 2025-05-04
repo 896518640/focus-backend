@@ -9,6 +9,10 @@
     {
       "name": "通义听悟",
       "description": "音频识别与转录相关API"
+    },
+    {
+      "name": "翻译管理",
+      "description": "翻译记录管理相关API"
     }
   ],
   "paths": {
@@ -548,6 +552,446 @@
           }
         }
       }
+    },
+    "/api/v1/translation/save": {
+      "post": {
+        "tags": [
+          "翻译管理"
+        ],
+        "summary": "保存翻译记录",
+        "description": "保存新的翻译记录到系统",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveTranslationParams"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "保存成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "翻译记录保存成功"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/TranslationResponse"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "缺少必要参数"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "未授权",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "用户未登录或token已过期"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/translation/list": {
+      "get": {
+        "tags": [
+          "翻译管理"
+        ],
+        "summary": "获取翻译记录列表",
+        "description": "分页获取用户的翻译记录列表",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "页码（从1开始）",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "每页条数",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "获取成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "获取翻译记录列表成功"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/TranslationListResponse"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "未授权",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "用户未登录或token已过期"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/translation/detail/{id}": {
+      "get": {
+        "tags": [
+          "翻译管理"
+        ],
+        "summary": "获取翻译记录详情",
+        "description": "根据ID获取特定翻译记录的详细信息",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "翻译记录ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "获取成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "获取翻译记录详情成功"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/TranslationResponse"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "未授权",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "用户未登录或token已过期"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "禁止访问",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "无权访问此翻译记录"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "记录不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "翻译记录不存在"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/translation/delete/{id}": {
+      "delete": {
+        "tags": [
+          "翻译管理"
+        ],
+        "summary": "删除翻译记录",
+        "description": "根据ID删除特定的翻译记录",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "翻译记录ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "删除成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "删除翻译记录成功"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/DeleteTranslationResponse"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "未授权",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "用户未登录或token已过期"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "禁止访问",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "无权删除此翻译记录"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "记录不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "翻译记录不存在"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -858,6 +1302,204 @@
             "type": "boolean",
             "default": false,
             "description": "是否开启自定义prompt功能"
+          }
+        }
+      },
+      "SaveTranslationParams": {
+        "type": "object",
+        "required": [
+          "title",
+          "sourceLanguage",
+          "targetLanguage",
+          "originalText",
+          "translatedText",
+          "duration",
+          "timestamp"
+        ],
+        "properties": {
+          "taskId": {
+            "type": "string",
+            "nullable": true,
+            "description": "任务ID（可选）"
+          },
+          "title": {
+            "type": "string",
+            "description": "标题"
+          },
+          "sourceLanguage": {
+            "type": "string",
+            "description": "源语言"
+          },
+          "targetLanguage": {
+            "type": "string",
+            "description": "目标语言"
+          },
+          "originalText": {
+            "type": "string",
+            "description": "原文内容"
+          },
+          "translatedText": {
+            "type": "string",
+            "description": "翻译内容"
+          },
+          "duration": {
+            "type": "number",
+            "description": "录音时长（秒）"
+          },
+          "timestamp": {
+            "type": "number",
+            "description": "时间戳"
+          },
+          "taskStatus": {
+            "type": "string",
+            "description": "任务状态",
+            "enum": [
+              "success",
+              "processing",
+              "failed"
+            ]
+          },
+          "outputMp3Path": {
+            "type": "string",
+            "nullable": true,
+            "description": "输出MP3文件路径"
+          },
+          "errorMessage": {
+            "type": "string",
+            "nullable": true,
+            "description": "错误信息"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "标签（可选）"
+          }
+        }
+      },
+      "TranslationResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "记录ID"
+          },
+          "title": {
+            "type": "string",
+            "description": "标题"
+          },
+          "sourceText": {
+            "type": "string",
+            "description": "原文内容"
+          },
+          "translatedText": {
+            "type": "string",
+            "description": "翻译内容"
+          },
+          "originalText": {
+            "type": "string",
+            "description": "原文内容（兼容字段）"
+          },
+          "sourceLanguage": {
+            "type": "string",
+            "description": "源语言"
+          },
+          "targetLanguage": {
+            "type": "string",
+            "description": "目标语言"
+          },
+          "taskId": {
+            "type": "string",
+            "nullable": true,
+            "description": "任务ID"
+          },
+          "taskStatus": {
+            "type": "string",
+            "nullable": true,
+            "description": "任务状态",
+            "enum": [
+              "success",
+              "processing",
+              "failed"
+            ]
+          },
+          "duration": {
+            "type": "number",
+            "description": "录音时长（秒）"
+          },
+          "timestamp": {
+            "type": "number",
+            "description": "时间戳"
+          },
+          "outputMp3Path": {
+            "type": "string",
+            "nullable": true,
+            "description": "输出MP3文件路径"
+          },
+          "errorMessage": {
+            "type": "string",
+            "nullable": true,
+            "description": "错误信息"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "标签"
+          },
+          "isFavorite": {
+            "type": "boolean",
+            "description": "是否收藏"
+          },
+          "isVoice": {
+            "type": "boolean",
+            "description": "是否语音翻译"
+          },
+          "status": {
+            "type": "string",
+            "description": "记录状态",
+            "enum": [
+              "success",
+              "processing",
+              "failed"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "创建时间"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "更新时间"
+          }
+        }
+      },
+      "TranslationListResponse": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "number",
+            "description": "总记录数"
+          },
+          "list": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TranslationResponse"
+            },
+            "description": "翻译记录列表"
+          }
+        }
+      },
+      "DeleteTranslationResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "操作是否成功"
           }
         }
       }
