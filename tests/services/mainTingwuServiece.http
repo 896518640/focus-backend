@@ -1,23 +1,43 @@
-###
-POST  http://localhost:3000/api/v1/mainTingwu/tasks
+### 转录功能
+POST  http://localhost:3000/api/v1/tingwu/tasks
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxN2Q5YTZiMy01N2Y5LTQyN2UtODUxMC02MTI4ODQ2OWJlOWIiLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDYxNzg1NjgsImV4cCI6MTc0NjI2NDk2OH0.Dy7hm0WhuE6p92DXcVL_8AmvuJVJkVONTp8BYpfFUEI
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxN2Q5YTZiMy01N2Y5LTQyN2UtODUxMC02MTI4ODQ2OWJlOWIiLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDYzMzg3MDUsImV4cCI6MTc0NjQyNTEwNX0.gjQUUkiCBC6aHHJS9es1F3zebbbmAtZWXiKtSq_iY9g
 
 {
     "type": "offline",
     "input": {
-         "fileUrl": "https://focus-01.oss-cn-beijing.aliyuncs.com/audio/20250503T080806-82831c36-8c59-4f71-a289-31f50b8906e9-500hz-107658.mp3",
-        "sourceLanguage": "cn"
+        "sourceLanguage": "cn",
+        "fileUrl": "https://focus-01.oss-cn-beijing.aliyuncs.com/audio/20250413T123935-1355d577-b11e-4d49-84bd-a5f73dccb7a8-4%C3%A6%C2%9C%C2%884%C3%A6%C2%97%C2%A5.MP3"
     },
     "parameters": {
-        "translationEnabled": true,
+        "translationEnabled": false,
         "translation": {
             "targetLanguages": ["en"],
             "outputLevel": 2
+        },
+        "transcoding": {
+            "targetAudioFormat": "mp3"
+        },
+        "transcription": {
+            "audioEventDetectionEnabled": true,
+            "diarization": { 
+                "speakerCount": 2
+            },
+            "outputLevel": 2
+        },
+        "autoChaptersEnabled": false,
+        "meetingAssistanceEnabled": false,
+        "meetingAssistance": {
+            "types": ["Actions", "KeyInformation"]
+        },
+        "summarizationEnabled": false,
+        "summarization": {
+            "types": ["Paragraph", "Conversational", "QuestionsAnswering"]
         }
     }
 }
 
+# type = offline Response
 # {
 #   "success": true,
 #   "message": "成功创建通义听悟任务",
@@ -38,14 +58,27 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxN2Q5Y
 #     "requestId": "5D5368CE-93CA-5761-B71D-3A57AA1FDB6D"
 #   },
 #   "timestamp": "2025-05-03T07:46:11.287Z"
+# }
+
+# type = realtime Response
+# {
+#   "success": true,
+#   "message": "成功创建通义听悟任务",
+#   "data": {
+#     "taskId": "63510af9846844f0a7d6ebe246e4059d",
+#     "taskStatus": "NEW",
+#     "requestId": "67E457F2-A06A-5FFC-8858-4FB0256C7F9A",
+#     "meetingJoinUrl": "wss://tingwu-realtime-cn-beijing.aliyuncs.com/api/ws/v1?mc=6FloKJ2A5FpvudAL8NcU40Wj4PYPFHSqSh6UWmx8S2Ttv-5lvS-v9OqePlMENkIdGO1QMqOCTTbvymC6QX2f0OHjZeb92l38a_DhBCCahWfgWaYk2IfgFxg2uMosOhdV"
+#   },
+#   "timestamp": "2025-05-03T12:27:28.510Z"
 # }
 
 
 
 ###
-GET http://localhost:3000/api/v1/mainTingwu/tasks/e62c70c4e8bc4b2d805d8ac93cd9802c
+GET http://localhost:3000/api/v1/tingwu/tasks/c56cc7049a3d41dd9dbf5965e8d7beb6
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxN2Q5YTZiMy01N2Y5LTQyN2UtODUxMC02MTI4ODQ2OWJlOWIiLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDYxNzg1NjgsImV4cCI6MTc0NjI2NDk2OH0.Dy7hm0WhuE6p92DXcVL_8AmvuJVJkVONTp8BYpfFUEI
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxN2Q5YTZiMy01N2Y5LTQyN2UtODUxMC02MTI4ODQ2OWJlOWIiLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDYzMzg3MDUsImV4cCI6MTc0NjQyNTEwNX0.gjQUUkiCBC6aHHJS9es1F3zebbbmAtZWXiKtSq_iY9g
 
 # {
 #   "success": true,

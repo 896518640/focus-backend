@@ -42,13 +42,17 @@ class MainTingwuController extends BaseController {
         operation
       });
       
+
+      console.log('result', JSON.stringify(result));
       // 完全优化响应结构：直接提取任务ID和状态，添加requestId作为元数据
       const responseData = {
         taskId: result.data.taskId,
         taskStatus: result.data.taskStatus,
-        requestId: result.requestId
+        requestId: result.requestId,
+        ...result.data
       };
       
+      console.log('responseData', JSON.stringify(responseData));
       // 请求成功
       return this.success(res, '成功创建通义听悟任务', responseData);
     } catch (error) {
@@ -80,13 +84,15 @@ class MainTingwuController extends BaseController {
       const responseData = {
         taskId: result.data.taskId,
         taskStatus: result.data.taskStatus,
-        requestId: result.requestId
+        requestId: result.requestId,
+        ...result.data
       };
       
       // 如果有结果文件，添加到响应
       if (result.data.result) {
         responseData.result = result.data.result;
       }
+
       
       // 请求成功
       return this.success(res, '成功获取通义听悟任务信息', responseData);

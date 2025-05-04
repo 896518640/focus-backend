@@ -4,7 +4,7 @@
 import express from 'express';
 import authRoutes from './auth.js';
 import userRoutes from './user.js';
-import tingwuRoutes from './tingwuRoutes.js';
+// import tingwuRoutes from './tingwuRoutes.js';
 import mainTingwuRoutes from './mainTingwuRoutes.js';
 import createLogger from '../../utils/logger.js';
 import { authenticate } from '../../middlewares/authMiddleware.js';
@@ -23,8 +23,8 @@ const authHandler = createRouteHelper(authController);
 // 注册子路由模块
 router.use('/auth', authRoutes);
 router.use('/user', userRoutes);
-router.use('/tingwu', tingwuRoutes);
-router.use('/mainTingwu', mainTingwuRoutes);
+// router.use('/tingwu', tingwuRoutes);
+router.use('/tingwu', mainTingwuRoutes);
 
 // 定义主路由配置
 const routes = [

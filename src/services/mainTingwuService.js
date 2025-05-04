@@ -222,6 +222,7 @@ class MainTingwuService extends BaseService {
       // 调用API获取任务信息
       const response = await this.client.getTaskInfoWithOptions(taskId, headers, runtime);
       
+      console.log("getTaskInfo response", response);
       // 检查API响应状态
       if (response?.body?.code !== '0') {
         throw new ServiceError(`API返回错误: ${response?.body?.message || '未知错误'}`, 500, {

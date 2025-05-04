@@ -21,6 +21,7 @@ class BaseController {
    * @returns {Object} Express响应
    */
   success(res, message = '操作成功', data = null, statusCode = 200) {
+    console.log('success', JSON.stringify(data));
     return res.status(statusCode).json({
       success: true,
       message,
