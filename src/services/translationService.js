@@ -73,7 +73,7 @@ class TranslationService extends BaseService {
       // 记录用户活动
       await this.recordActivity(userId, translation.id, data.title);
 
-      return this.formatTranslation(translation);
+      return this.formatTranslationDetail(translation);
     }, [], '保存翻译记录失败');
   }
 
@@ -101,10 +101,13 @@ class TranslationService extends BaseService {
         take: pageSize,
       });
 
-      // 处理结果
+      // 增强分页信息
       return {
         total,
-        list: translations.map(this.formatTranslation)
+        page,
+        pageSize,
+        totalPages: Math.ceil(total / pageSize),
+        list: translations.map(this.formatTranslationListItem)
       };
     }, [], '获取翻译记录列表失败');
   }
@@ -136,7 +139,7 @@ class TranslationService extends BaseService {
         throw error;
       }
 
-      return this.formatTranslation(translation);
+      return this.formatTranslationDetail(translation);
     }, [], '获取翻译记录详情失败');
   }
 
@@ -228,23 +231,59 @@ class TranslationService extends BaseService {
   }
 
   /**
-   * 格式化翻译记录
+   * 格式化翻译记录详情（用于详情页面）
    * @param {Object} translation - 原始翻译记录
    * @returns {Object} 格式化后的翻译记录
    */
-  formatTranslation(translation) {
-    // 处理BigInt
+  formatTranslationDetail(translation) {
+    // 处理BigInt和提取需要的字段
+    const { sourceText, userId, ...rest } = translation;
+    
+    // 统一状态字段
+    const status = translation.status || translation.taskStatus || 'unknown';
+    
     const formatted = {
-      ...translation,
+      ...rest,
+      status,
       timestamp: Number(translation.timestamp),
       tags: translation.tags ? JSON.parse(translation.tags) : [],
-      originalText: translation.sourceText,
+      originalText: sourceText,
       createdAt: translation.createdAt.toISOString(),
       updatedAt: translation.updatedAt ? translation.updatedAt.toISOString() : null
     };
-
-    // 返回格式化数据
+    
+    // 如果taskStatus和status一致，移除taskStatus
+    if (formatted.taskStatus === formatted.status) {
+      delete formatted.taskStatus;
+    }
+    
     return formatted;
+  }
+  
+  /**
+   * 格式化翻译记录列表项（用于列表页面，包含较少字段）
+   * @param {Object} translation - 原始翻译记录
+   * @returns {Object} 格式化后的简化翻译记录
+   */
+  formatTranslationListItem(translation) {
+    // 统一状态字段
+    const status = translation.status || translation.taskStatus || 'unknown';
+    
+    // 返回简化的信息
+    return {
+      id: translation.id,
+      title: translation.title,
+      originalText: translation.sourceText,
+      translatedText: translation.translatedText,
+      sourceLanguage: translation.sourceLanguage,
+      targetLanguage: translation.targetLanguage,
+      duration: translation.duration,
+      status,
+      createdAt: translation.createdAt.toISOString(),
+      timestamp: Number(translation.timestamp),
+      outputMp3Path: translation.outputMp3Path,
+      isFavorite: translation.isFavorite
+    };
   }
 }
 

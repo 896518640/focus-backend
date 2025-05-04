@@ -25,7 +25,7 @@ class TranslationController extends BaseController {
 
       const result = await translationService.saveTranslation(translationData, userId);
 
-      this.success(res, '翻译记录保存成功', result);
+      this.success(res, '翻译记录保存成功', result, 201); // 使用201状态码表示资源创建成功
     } catch (error) {
       this.fail(res, error.message || '保存翻译记录失败', error, error.status || 500);
     }
@@ -58,13 +58,24 @@ class TranslationController extends BaseController {
   async getTranslationDetail(req, res) {
     try {
       const userId = req.user.userId;
-      const translationId = req.params.id;
+      const { id } = req.params;
 
-      const result = await translationService.getTranslationDetail(translationId, userId);
+      if (!id) {
+        return this.fail(res, '记录ID不能为空', null, 400);
+      }
+
+      const result = await translationService.getTranslationDetail(id, userId);
 
       this.success(res, '获取翻译记录详情成功', result);
     } catch (error) {
-      this.fail(res, error.message || '获取翻译记录详情失败', error, error.status || 500);
+      // 使用合适的状态码
+      if (error.message.includes('不存在')) {
+        this.fail(res, error.message, error, 404);
+      } else if (error.message.includes('无权访问')) {
+        this.fail(res, error.message, error, 403);
+      } else {
+        this.fail(res, error.message || '获取翻译记录详情失败', error, error.status || 500);
+      }
     }
   }
 
@@ -76,13 +87,24 @@ class TranslationController extends BaseController {
   async deleteTranslation(req, res) {
     try {
       const userId = req.user.userId;
-      const translationId = req.params.id;
+      const { id } = req.params;
 
-      const result = await translationService.deleteTranslation(translationId, userId);
+      if (!id) {
+        return this.fail(res, '记录ID不能为空', null, 400);
+      }
 
-      this.success(res, '删除翻译记录成功', result);
+      const result = await translationService.deleteTranslation(id, userId);
+
+      this.success(res, '翻译记录删除成功', result);
     } catch (error) {
-      this.fail(res, error.message || '删除翻译记录失败', error, error.status || 500);
+      // 使用合适的状态码
+      if (error.message.includes('不存在')) {
+        this.fail(res, error.message, error, 404);
+      } else if (error.message.includes('无权删除')) {
+        this.fail(res, error.message, error, 403);
+      } else {
+        this.fail(res, error.message || '删除翻译记录失败', error, error.status || 500);
+      }
     }
   }
 }

@@ -25,7 +25,7 @@ export default {
         }
       },
       responses: {
-        200: {
+        201: {
           description: '保存成功',
           content: {
             'application/json': {
@@ -41,11 +41,7 @@ export default {
                     example: '翻译记录保存成功'
                   },
                   data: {
-                    $ref: '#/components/schemas/TranslationResponse'
-                  },
-                  timestamp: {
-                    type: 'string',
-                    format: 'date-time'
+                    $ref: '#/components/schemas/TranslationDetailResponse'
                   }
                 }
               }
@@ -65,11 +61,7 @@ export default {
                   },
                   message: {
                     type: 'string',
-                    example: '缺少必要参数'
-                  },
-                  timestamp: {
-                    type: 'string',
-                    format: 'date-time'
+                    example: '保存翻译记录失败：必要参数缺失'
                   }
                 }
               }
@@ -89,11 +81,27 @@ export default {
                   },
                   message: {
                     type: 'string',
-                    example: '用户未登录或token已过期'
+                    example: '未授权或登录已过期'
+                  }
+                }
+              }
+            }
+          }
+        },
+        500: {
+          description: '服务器错误',
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  success: {
+                    type: 'boolean',
+                    example: false
                   },
-                  timestamp: {
+                  message: {
                     type: 'string',
-                    format: 'date-time'
+                    example: '保存翻译记录失败：服务器错误'
                   }
                 }
               }
@@ -111,25 +119,30 @@ export default {
     get: {
       tags: ['翻译管理'],
       summary: '获取翻译记录列表',
-      description: '分页获取用户的翻译记录列表',
+      description: '分页获取当前用户的翻译记录列表',
       security: [{ bearerAuth: [] }],
       parameters: [
         {
           name: 'page',
           in: 'query',
-          description: '页码（从1开始）',
+          description: '页码',
+          required: false,
           schema: {
             type: 'integer',
-            default: 1
+            default: 1,
+            minimum: 1
           }
         },
         {
           name: 'pageSize',
           in: 'query',
           description: '每页条数',
+          required: false,
           schema: {
             type: 'integer',
-            default: 10
+            default: 10,
+            minimum: 1,
+            maximum: 50
           }
         }
       ],
@@ -151,10 +164,6 @@ export default {
                   },
                   data: {
                     $ref: '#/components/schemas/TranslationListResponse'
-                  },
-                  timestamp: {
-                    type: 'string',
-                    format: 'date-time'
                   }
                 }
               }
@@ -174,11 +183,27 @@ export default {
                   },
                   message: {
                     type: 'string',
-                    example: '用户未登录或token已过期'
+                    example: '未授权或登录已过期'
+                  }
+                }
+              }
+            }
+          }
+        },
+        500: {
+          description: '服务器错误',
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  success: {
+                    type: 'boolean',
+                    example: false
                   },
-                  timestamp: {
+                  message: {
                     type: 'string',
-                    format: 'date-time'
+                    example: '获取翻译记录列表失败：服务器错误'
                   }
                 }
               }
@@ -202,8 +227,8 @@ export default {
         {
           name: 'id',
           in: 'path',
-          required: true,
           description: '翻译记录ID',
+          required: true,
           schema: {
             type: 'string'
           }
@@ -226,11 +251,27 @@ export default {
                     example: '获取翻译记录详情成功'
                   },
                   data: {
-                    $ref: '#/components/schemas/TranslationResponse'
+                    $ref: '#/components/schemas/TranslationDetailResponse'
+                  }
+                }
+              }
+            }
+          }
+        },
+        400: {
+          description: '请求参数错误',
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  success: {
+                    type: 'boolean',
+                    example: false
                   },
-                  timestamp: {
+                  message: {
                     type: 'string',
-                    format: 'date-time'
+                    example: '记录ID不能为空'
                   }
                 }
               }
@@ -250,11 +291,7 @@ export default {
                   },
                   message: {
                     type: 'string',
-                    example: '用户未登录或token已过期'
-                  },
-                  timestamp: {
-                    type: 'string',
-                    format: 'date-time'
+                    example: '未授权或登录已过期'
                   }
                 }
               }
@@ -275,10 +312,6 @@ export default {
                   message: {
                     type: 'string',
                     example: '无权访问此翻译记录'
-                  },
-                  timestamp: {
-                    type: 'string',
-                    format: 'date-time'
                   }
                 }
               }
@@ -299,10 +332,26 @@ export default {
                   message: {
                     type: 'string',
                     example: '翻译记录不存在'
+                  }
+                }
+              }
+            }
+          }
+        },
+        500: {
+          description: '服务器错误',
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  success: {
+                    type: 'boolean',
+                    example: false
                   },
-                  timestamp: {
+                  message: {
                     type: 'string',
-                    format: 'date-time'
+                    example: '获取翻译记录详情失败：服务器错误'
                   }
                 }
               }
@@ -326,8 +375,8 @@ export default {
         {
           name: 'id',
           in: 'path',
-          required: true,
           description: '翻译记录ID',
+          required: true,
           schema: {
             type: 'string'
           }
@@ -347,14 +396,30 @@ export default {
                   },
                   message: {
                     type: 'string',
-                    example: '删除翻译记录成功'
+                    example: '翻译记录删除成功'
                   },
                   data: {
-                    $ref: '#/components/schemas/DeleteTranslationResponse'
+                    $ref: '#/components/schemas/OperationResult'
+                  }
+                }
+              }
+            }
+          }
+        },
+        400: {
+          description: '请求参数错误',
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  success: {
+                    type: 'boolean',
+                    example: false
                   },
-                  timestamp: {
+                  message: {
                     type: 'string',
-                    format: 'date-time'
+                    example: '记录ID不能为空'
                   }
                 }
               }
@@ -374,11 +439,7 @@ export default {
                   },
                   message: {
                     type: 'string',
-                    example: '用户未登录或token已过期'
-                  },
-                  timestamp: {
-                    type: 'string',
-                    format: 'date-time'
+                    example: '未授权或登录已过期'
                   }
                 }
               }
@@ -386,7 +447,7 @@ export default {
           }
         },
         403: {
-          description: '禁止访问',
+          description: '禁止操作',
           content: {
             'application/json': {
               schema: {
@@ -399,10 +460,6 @@ export default {
                   message: {
                     type: 'string',
                     example: '无权删除此翻译记录'
-                  },
-                  timestamp: {
-                    type: 'string',
-                    format: 'date-time'
                   }
                 }
               }
@@ -423,10 +480,26 @@ export default {
                   message: {
                     type: 'string',
                     example: '翻译记录不存在'
+                  }
+                }
+              }
+            }
+          }
+        },
+        500: {
+          description: '服务器错误',
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  success: {
+                    type: 'boolean',
+                    example: false
                   },
-                  timestamp: {
+                  message: {
                     type: 'string',
-                    format: 'date-time'
+                    example: '删除翻译记录失败：服务器错误'
                   }
                 }
               }
