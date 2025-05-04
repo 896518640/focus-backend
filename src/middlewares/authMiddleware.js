@@ -17,7 +17,10 @@ export function authenticate(req, res, next) {
     const authHeader = req.headers.authorization;
     
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      logger.warn('未提供Authorization令牌');
+      logger.warn(`未提供Authorization令牌: ${authHeader} ${JSON.stringify(req.headers)}`);
+      console.log(req.headers);
+      // 打印请求url
+      console.log(req.url);
       return res.status(401).json({
         code: 401,
         message: '未授权访问，请提供有效Token',

@@ -22,28 +22,25 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxN2Q5Y
 #   "success": true,
 #   "message": "翻译记录保存成功",
 #   "data": {
-#     "id": "0bd197dd-2e6f-4b15-9f60-cb2f5ec62e58",
-#     "sourceText": "没有，没错，对吧？但是现在不是的，现在贵阳开始搞云计算，开始搞大数据，搞智能网联。那产业一生气会有什么后果呢？当地的人挣到钱了，你。",
+#     "id": "932a2d12-caf6-4712-8c87-e677be16f7a9",
 #     "translatedText": "No, right, right? But not now. Now Guiyang is starting to engage in cloud computing, big data and intelligent network connection. What will happen when the industry gets angry? Local people earn\nThe local people have made money, you",
 #     "sourceLanguage": "cn",
 #     "targetLanguage": "en",
 #     "isFavorite": false,
 #     "isVoice": false,
-#     "createdAt": "2025-05-04T15:23:29.278Z",
-#     "userId": "17d9a6b3-57f9-427e-8510-61288469be9b",
+#     "createdAt": "2025-05-04T15:29:56.380Z",
 #     "duration": 9,
 #     "errorMessage": null,
 #     "outputMp3Path": "https://example.com/audio/sample-mp3-file.mp3",
 #     "status": "COMPLETED",
 #     "tags": [],
 #     "taskId": "e224ad57504e42109a192165740fb6e2",
-#     "taskStatus": "COMPLETED",
 #     "timestamp": 1746371455967,
 #     "title": "同传翻译 2025/5/4 23:10:55",
-#     "updatedAt": "2025-05-04T15:23:29.278Z",
+#     "updatedAt": "2025-05-04T15:29:56.380Z",
 #     "originalText": "没有，没错，对吧？但是现在不是的，现在贵阳开始搞云计算，开始搞大数据，搞智能网联。那产业一生气会有什么后果呢？当地的人挣到钱了，你。"
 #   },
-#   "timestamp": "2025-05-04T15:23:29.290Z"
+#   "timestamp": "2025-05-04T15:29:56.399Z"
 # }
 
 
@@ -94,30 +91,44 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxN2Q5Y
 # 翻译记录详情 Response
 # {
 #   "success": true,
-#   "message": "获取翻译记录详情成功",
+#   "message": "获取翻译记录列表成功",
 #   "data": {
-#     "id": "c572993e-098f-4874-8230-24d8ef2349a4",
-#     "sourceText": "没有，没错，对吧？但是现在不是的，现在贵阳开始搞云计算，开始搞大数据，搞智能网联。那产业一生气会有什么后果呢？当地的人挣到钱了，你。",
-#     "translatedText": "No, right, right? But not now. Now Guiyang is starting to engage in cloud computing, big data and intelligent network connection. What will happen when the industry gets angry? Local people earn\nThe local people have made money, you",
-#     "sourceLanguage": "cn",
-#     "targetLanguage": "en",
-#     "isFavorite": false,
-#     "isVoice": false,
-#     "createdAt": "2025-05-04T15:19:15.996Z",
-#     "userId": "17d9a6b3-57f9-427e-8510-61288469be9b",
-#     "duration": 9,
-#     "errorMessage": null,
-#     "outputMp3Path": "https://example.com/audio/sample-mp3-file.mp3",
-#     "status": "COMPLETED",
-#     "tags": [],
-#     "taskId": "e224ad57504e42109a192165740fb6e2",
-#     "taskStatus": "COMPLETED",
-#     "timestamp": 1746371455967,
-#     "title": "同传翻译 2025/5/4 23:10:55",
-#     "updatedAt": "2025-05-04T15:19:15.996Z",
-#     "originalText": "没有，没错，对吧？但是现在不是的，现在贵阳开始搞云计算，开始搞大数据，搞智能网联。那产业一生气会有什么后果呢？当地的人挣到钱了，你。"
+#     "total": 2,
+#     "page": 1,
+#     "pageSize": 10,
+#     "totalPages": 1,
+#     "list": [
+#       {
+#         "id": "932a2d12-caf6-4712-8c87-e677be16f7a9",
+#         "title": "同传翻译 2025/5/4 23:10:55",
+#         "originalText": "没有，没错，对吧？但是现在不是的，现在贵阳开始搞云计算，开始搞大数据，搞智能网联。那产业一生气会有什么后果呢？当地的人挣到钱了，你。",
+#         "translatedText": "No, right, right? But not now. Now Guiyang is starting to engage in cloud computing, big data and intelligent network connection. What will happen when the industry gets angry? Local people earn\nThe local people have made money, you",
+#         "sourceLanguage": "cn",
+#         "targetLanguage": "en",
+#         "duration": 9,
+#         "status": "COMPLETED",
+#         "createdAt": "2025-05-04T15:29:56.380Z",
+#         "timestamp": 1746371455967,
+#         "outputMp3Path": "https://example.com/audio/sample-mp3-file.mp3",
+#         "isFavorite": false
+#       },
+#       {
+#         "id": "0bd197dd-2e6f-4b15-9f60-cb2f5ec62e58",
+#         "title": "同传翻译 2025/5/4 23:10:55",
+#         "originalText": "没有，没错，对吧？但是现在不是的，现在贵阳开始搞云计算，开始搞大数据，搞智能网联。那产业一生气会有什么后果呢？当地的人挣到钱了，你。",
+#         "translatedText": "No, right, right? But not now. Now Guiyang is starting to engage in cloud computing, big data and intelligent network connection. What will happen when the industry gets angry? Local people earn\nThe local people have made money, you",
+#         "sourceLanguage": "cn",
+#         "targetLanguage": "en",
+#         "duration": 9,
+#         "status": "COMPLETED",
+#         "createdAt": "2025-05-04T15:23:29.278Z",
+#         "timestamp": 1746371455967,
+#         "outputMp3Path": "https://example.com/audio/sample-mp3-file.mp3",
+#         "isFavorite": false
+#       }
+#     ]
 #   },
-#   "timestamp": "2025-05-04T15:23:02.572Z"
+#   "timestamp": "2025-05-04T15:30:28.211Z"
 # }
 
 ### 删除翻译记录
