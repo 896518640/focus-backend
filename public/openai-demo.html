@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OpenAI/OpenRouter API 测试</title>
+  <style>
+    body {
+      font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f5f5f5;
+      color: #333;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+    }
+    h1 {
+      color: #2c3e50;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .input-group {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+    textarea, select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+    .button-group {
+      display: flex;
+      gap: 10px;
+    }
+    button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      background-color: #3498db;
+      color: white;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background-color: #2980b9;
+    }
+    button:disabled {
+      background-color: #95a5a6;
+      cursor: not-allowed;
+    }
+    .response-box {
+      margin-top: 20px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 15px;
+      background-color: #f9f9f9;
+      min-height: 100px;
+      white-space: pre-wrap;
+    }
+    .status {
+      margin-top: 10px;
+      padding: 8px;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    .status.success {
+      background-color: #e8f5e9;
+      border: 1px solid #a5d6a7;
+      color: #2e7d32;
+    }
+    .status.error {
+      background-color: #ffebee;
+      border: 1px solid #ef9a9a;
+      color: #c62828;
+    }
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(0, 0, 0, 0.1);
+      border-radius: 50%;
+      border-top-color: #3498db;
+      animation: spin 1s ease-in-out infinite;
+      margin-right: 10px;
+      vertical-align: middle;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .hidden {
+      display: none;
+    }
+    .info {
+      font-size: 14px;
+      margin-top: 15px;
+      padding: 10px;
+      background-color: #e3f2fd;
+      border-radius: 4px;
+      border-left: 4px solid #2196f3;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>OpenAI/OpenRouter API 测试</h1>
+    
+    <div class="input-group">
+      <label for="model-select">选择模型:</label>
+      <select id="model-select">
+        <option value="openai/gpt-4o">OpenAI GPT-4o (推荐)</option>
+        <option value="openai/gpt-4-turbo">OpenAI GPT-4 Turbo</option>
+        <option value="anthropic/claude-3-opus">Anthropic Claude 3 Opus</option>
+        <option value="anthropic/claude-3-sonnet">Anthropic Claude 3 Sonnet</option>
+        <option value="google/gemini-pro">Google Gemini Pro</option>
+        <option value="meta-llama/llama-3-70b">Meta Llama 3 70B</option>
+      </select>
+    </div>
+    
+    <div class="input-group">
+      <label for="user-input">输入您的问题或提示:</label>
+      <textarea id="user-input" placeholder="例如: 请用简单的语言解释量子计算的基本原理"></textarea>
+    </div>
+    
+    <div class="button-group">
+      <button id="chat-btn">发送聊天请求</button>
+      <button id="completion-btn">发送简单文本请求</button>
+      <button id="clear-btn">清空</button>
+    </div>
+    
+    <div id="status" class="status hidden"></div>
+    
+    <div class="input-group">
+      <label>AI 响应:</label>
+      <div id="response-box" class="response-box">
+        <div id="loading-indicator" class="hidden">
+          <span class="loading"></span> 正在生成响应，请稍候...
+        </div>
+        <div id="response-content"></div>
+      </div>
+    </div>
+    
+    <div class="info">
+      <p><strong>注意:</strong> 您需要先登录系统才能使用此功能。API调用需要认证令牌。</p>
+      <p><strong>使用提示:</strong> 聊天请求支持多轮对话，保持上下文。简单文本请求适用于单次问答。</p>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // 元素引用
+      const modelSelect = document.getElementById('model-select');
+      const userInput = document.getElementById('user-input');
+      const chatBtn = document.getElementById('chat-btn');
+      const completionBtn = document.getElementById('completion-btn');
+      const clearBtn = document.getElementById('clear-btn');
+      const statusEl = document.getElementById('status');
+      const loadingIndicator = document.getElementById('loading-indicator');
+      const responseContent = document.getElementById('response-content');
+      
+      // 保存对话历史
+      let messages = [];
+      
+      // 检查认证状态
+      let authToken = localStorage.getItem('authToken');
+      if (!authToken) {
+        showStatus('未检测到登录状态，请先登录系统获取授权', 'error');
+      }
+      
+      // 事件处理
+      chatBtn.addEventListener('click', () => sendRequest('chat'));
+      completionBtn.addEventListener('click', () => sendRequest('completion'));
+      clearBtn.addEventListener('click', clearAll);
+      
+      // 发送请求函数
+      async function sendRequest(type) {
+        const prompt = userInput.value.trim();
+        if (!prompt) {
+          showStatus('请输入问题或提示', 'error');
+          return;
+        }
+        
+        if (!authToken) {
+          showStatus('请先登录系统获取授权', 'error');
+          return;
+        }
+        
+        // 显示加载状态
+        setLoading(true);
+        
+        // 准备请求数据
+        const model = modelSelect.value;
+        let requestData;
+        
+        if (type === 'chat') {
+          // 添加新的用户消息
+          messages.push({ role: 'user', content: prompt });
+          
+          requestData = {
+            model,
+            messages: [...messages],
+            temperature: 0.7
+          };
+        } else {
+          // 简单完成只发送当前提示
+          requestData = {
+            prompt,
+            model,
+            temperature: 0.7
+          };
+        }
+        
+        try {
+          const response = await fetch(`/api/v1/openai/${type}`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${authToken}`
+            },
+            body: JSON.stringify(requestData)
+          });
+          
+          const data = await response.json();
+          
+          if (!response.ok) {
+            throw new Error(data.message || '请求失败');
+          }
+          
+          // 处理成功响应
+          if (data.success && data.data) {
+            const aiMessage = data.data.message;
+            
+            // 显示AI响应
+            responseContent.textContent = aiMessage.content;
+            
+            // 如果是聊天模式，将AI回复添加到消息历史
+            if (type === 'chat' && aiMessage) {
+              messages.push(aiMessage);
+            }
+            
+            // 显示成功状态
+            showStatus('响应生成成功', 'success');
+          } else {
+            throw new Error('响应数据格式不正确');
+          }
+        } catch (error) {
+          console.error('请求失败:', error);
+          responseContent.textContent = '';
+          showStatus(`错误: ${error.message}`, 'error');
+        } finally {
+          setLoading(false);
+        }
+      }
+      
+      // 清空所有内容
+      function clearAll() {
+        userInput.value = '';
+        responseContent.textContent = '';
+        statusEl.classList.add('hidden');
+        messages = [];
+      }
+      
+      // 显示状态消息
+      function showStatus(message, type) {
+        statusEl.textContent = message;
+        statusEl.className = `status ${type}`;
+        statusEl.classList.remove('hidden');
+      }
+      
+      // 设置加载状态
+      function setLoading(isLoading) {
+        if (isLoading) {
+          loadingIndicator.classList.remove('hidden');
+          chatBtn.disabled = true;
+          completionBtn.disabled = true;
+        } else {
+          loadingIndicator.classList.add('hidden');
+          chatBtn.disabled = false;
+          completionBtn.disabled = false;
+        }
+      }
+    });
+  </script>
+</body>
+</html> 

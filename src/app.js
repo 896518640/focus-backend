@@ -73,6 +73,7 @@ class App {
       const { default: tingwuService } = await import('./services/tingwuService.js');
       const { default: userService } = await import('./services/userService.js');
       const { default: authService } = await import('./services/authService.js');
+      const { default: openaiService } = await import('./services/openaiService.js');
       
       // 注册到服务容器
       serviceContainer.register('fileUploadService', fileUploadService);
@@ -80,6 +81,7 @@ class App {
       serviceContainer.register('tingwuService', tingwuService);
       serviceContainer.register('userService', userService);
       serviceContainer.register('authService', authService);
+      serviceContainer.register('openaiService', openaiService);
       
     } catch (error) {
       this.logger.error('注册服务失败', error);
@@ -115,6 +117,7 @@ class App {
     // 静态文件目录
     this.app.use('/uploads', express.static(this.config.uploadDir));
     this.app.use('/public', express.static(path.join(process.cwd(), 'public')));
+    this.app.use(express.static(path.join(process.cwd(), 'public')));
     
     // 请求时间记录中间件
     this.app.use((req, res, next) => {
@@ -140,6 +143,11 @@ class App {
   setupRoutes() {
     // API版本前缀
     const apiPrefix = configService.get('api.prefix', '/api/v1');
+    
+    // 根路由 - 直接发送首页
+    this.app.get('/', (req, res) => {
+      res.sendFile(path.join(process.cwd(), 'public', 'index.html'));
+    });
     
     // 健康检查路由
     this.app.get('/health', (req, res) => {

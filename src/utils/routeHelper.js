@@ -14,28 +14,40 @@ const logger = createLogger('RouteHelper');
 export const createRouteHelper = (controller) => {
   const wrappedMethods = {};
   
-  // 如果是类实例（包含原型链的对象）
-  if (controller && typeof controller === 'object') {
-    // 获取所有方法名
-    const methodNames = Object.getOwnPropertyNames(Object.getPrototypeOf(controller))
-      .filter(prop => 
-        typeof controller[prop] === 'function' && 
-        prop !== 'constructor' && 
-        !prop.startsWith('_')
-      );
-    
-    // 为每个方法创建异步包装
-    methodNames.forEach(methodName => {
-      wrappedMethods[methodName] = asyncHandler(controller[methodName].bind(controller));
-    });
+  if (!controller || typeof controller !== 'object') {
+    logger.warn('控制器无效，必须是一个对象');
+    return wrappedMethods;
   }
-  // 如果是包含多个函数的对象（导入的多个函数）
-  else if (controller && typeof controller === 'object') {
-    Object.keys(controller).forEach(key => {
-      if (typeof controller[key] === 'function') {
-        wrappedMethods[key] = asyncHandler(controller[key]);
-      }
+
+  // 获取实例自身的属性（处理箭头函数和直接定义在实例上的方法）
+  const instanceProps = Object.getOwnPropertyNames(controller);
+  instanceProps.forEach(prop => {
+    if (typeof controller[prop] === 'function' && !prop.startsWith('_')) {
+      wrappedMethods[prop] = asyncHandler(controller[prop].bind(controller));
+    }
+  });
+
+  // 获取原型链上的方法（处理通过class方法定义的函数）
+  const protoProps = Object.getOwnPropertyNames(Object.getPrototypeOf(controller))
+    .filter(prop => 
+      typeof controller[prop] === 'function' && 
+      prop !== 'constructor' && 
+      !prop.startsWith('_') &&
+      !wrappedMethods[prop] // 避免重复
+    );
+  
+  protoProps.forEach(methodName => {
+    wrappedMethods[methodName] = asyncHandler(controller[methodName].bind(controller));
+  });
+  
+  if (Object.keys(wrappedMethods).length === 0) {
+    logger.warn('在控制器中未找到任何可用方法', { 
+      controllerName: controller.constructor?.name || '未知控制器',
+      ownKeys: instanceProps,
+      protoKeys: protoProps
     });
+  } else {
+    logger.debug('已包装控制器方法', Object.keys(wrappedMethods));
   }
   
   return wrappedMethods;

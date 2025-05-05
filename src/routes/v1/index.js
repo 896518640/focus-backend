@@ -8,6 +8,7 @@ import userRoutes from './user.js';
 import mainTingwuRoutes from './mainTingwuRoutes.js';
 import translationRoutes from './translationRoutes.js';
 import createLogger from '../../utils/logger.js';
+import openaiRoutes from './openaiRoutes.js';
 import { authenticate } from '../../middlewares/authMiddleware.js';
 import authController from '../../controllers/authController.js';
 import { registerRoutes, createRouteHelper } from '../../utils/routeHelper.js';
@@ -27,6 +28,7 @@ router.use('/user', userRoutes);
 // router.use('/tingwu', tingwuRoutes);
 router.use('/tingwu', mainTingwuRoutes);
 router.use('/translation', translationRoutes);
+router.use('/openai', openaiRoutes);
 // 定义主路由配置
 const routes = [
   // 用户相关路由

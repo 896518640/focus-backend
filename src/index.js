@@ -58,8 +58,15 @@ app.use((req, res, next) => {
   next();
 });
 
-// 设置静态文件服务，用于访问上传的文件
+// 设置静态文件服务
 app.use('/uploads', express.static(path.join(process.cwd(), 'tmp', 'uploads')));
+app.use('/public', express.static(path.join(process.cwd(), 'public')));
+app.use(express.static(path.join(process.cwd(), 'public'))); // 直接访问根路径可以访问public下的文件
+
+// 根路由 - 如果静态文件服务未处理则发送首页
+app.get('/', (req, res) => {
+  res.sendFile(path.join(process.cwd(), 'public', 'index.html'));
+});
 
 // 配置Swagger API文档（仅在非生产环境中启用）
 if (process.env.NODE_ENV !== 'production') {
@@ -108,9 +115,10 @@ process.on('unhandledRejection', (reason, promise) => {
 });
 
 // 启动服务器
-const PORT = config.server.port;
-server.listen(PORT, () => {
-  logger.info(`服务器已启动，端口: ${PORT}`);
-  logger.info(`健康检查API: http://localhost:${PORT}/health`);
-  logger.info(`API文档: http://localhost:${PORT}/api-docs`);
+const port = config.server.port;
+server.listen(port, () => {
+  logger.info(`服务器已启动，端口: ${port}`);
+  logger.info(`网站首页: http://localhost:${port}/`);
+  logger.info(`健康检查API: http://localhost:${port}/health`);
+  logger.info(`API文档: http://localhost:${port}/api-docs`);
 });

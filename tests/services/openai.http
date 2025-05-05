@@ -1,0 +1,25 @@
+### 创建聊天完成
+POST http://localhost:3000/api/v1/openai/chat
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxN2Q5YTZiMy01N2Y5LTQyN2UtODUxMC02MTI4ODQ2OWJlOWIiLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDY0MTA2MDcsImV4cCI6MTc0NjQ5NzAwN30.AccclGF7thmxvO0zemSs-KC7ZYLxmvRwIUSUPRxjjAk
+
+{
+  "model": "anthropic/claude-3.5-sonnet",
+  "messages": [{"role": "user", "content": "你好 请你介绍一下自己"}],
+  "temperature": 0.5
+}
+
+### 创建文本完成
+POST http://localhost:3000/api/v1/openai/completion
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxN2Q5YTZiMy01N2Y5LTQyN2UtODUxMC02MTI4ODQ2OWJlOWIiLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDY0MTA2MDcsImV4cCI6MTc0NjQ5NzAwN30.AccclGF7thmxvO0zemSs-KC7ZYLxmvRwIUSUPRxjjAk
+
+{
+  "model": "anthropic/claude-3.5-sonnet",
+  "messages": [{"role": "user", "content": "你好 请你介绍一下自己"}],
+  "temperature": 0.5
+}
+
+
+### 获取OpenAI配置信息
+GET http://localhost:3000/api/v1/openai/config
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxN2Q5YTZiMy01N2Y5LTQyN2UtODUxMC02MTI4ODQ2OWJlOWIiLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDY0MTA2MDcsImV4cCI6MTc0NjQ5NzAwN30.AccclGF7thmxvO0zemSs-KC7ZYLxmvRwIUSUPRxjjAk
