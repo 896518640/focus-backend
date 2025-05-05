@@ -3,7 +3,7 @@
 
 import express from 'express';
 import translationController from '../../controllers/translationController.js';
-import { createRouteHelper, registerRoutes } from '../../utils/routeHelper.js';
+import { createRouteHelper, registerRoutes, createHandler } from '../../utils/routeHelper.js';
 import createLogger from '../../utils/logger.js';
 import { authenticate } from '../../middlewares/authMiddleware.js';
 
@@ -15,6 +15,10 @@ const handler = createRouteHelper(translationController);
 
 // 使用认证中间件
 router.use(authenticate);
+
+// 为流式总结单独配置路由
+// 注意：流式API不使用路由助手，因为它需要直接控制响应流
+router.post('/summarize', createHandler(translationController.streamingSummarize));
 
 // 定义路由配置
 const routes = [
@@ -41,7 +45,7 @@ const routes = [
     method: 'delete', 
     handler: handler.deleteTranslation,
     description: '删除翻译记录'
-  }
+  },
 ];
 
 // 批量注册路由

@@ -1,7 +1,7 @@
 ### 保存翻译记录
 POST  http://localhost:3000/api/v1/translation/save
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxN2Q5YTZiMy01N2Y5LTQyN2UtODUxMC02MTI4ODQ2OWJlOWIiLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDYzMzg3MDUsImV4cCI6MTc0NjQyNTEwNX0.gjQUUkiCBC6aHHJS9es1F3zebbbmAtZWXiKtSq_iY9g
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxN2Q5YTZiMy01N2Y5LTQyN2UtODUxMC02MTI4ODQ2OWJlOWIiLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDYzMzg3MDUsImV4cCI6MTc0NjQyNTEwNX0.gjQUUki CBC6aHHJS9es1F3zebbbmAtZWXiKtSq_iY9g
 
 {
     "taskId": "e224ad57504e42109a192165740fb6e2",
@@ -47,7 +47,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxN2Q5Y
 ### 获取翻译记录列表
 GET  http://localhost:3000/api/v1/translation/list
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxN2Q5YTZiMy01N2Y5LTQyN2UtODUxMC02MTI4ODQ2OWJlOWIiLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDYzMzg3MDUsImV4cCI6MTc0NjQyNTEwNX0.gjQUUkiCBC6aHHJS9es1F3zebbbmAtZWXiKtSq_iY9g
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxN2Q5YTZiMy01N2Y5LTQyN2UtODUxMC02MTI4ODQ2OWJlOWIiLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDYzMzg3MDUsImV4cCI6MTc0NjQyNTEwNX0.gjQUUki CBC6aHHJS9es1F3zebbbmAtZWXiKtSq_iY9g
 
 # 获取翻译记录列表 Response
 # {
@@ -86,7 +86,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxN2Q5Y
 ### 获取翻译记录详情
 GET  http://localhost:3000/api/v1/translation/detail/c572993e-098f-4874-8230-24d8ef2349a4
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxN2Q5YTZiMy01N2Y5LTQyN2UtODUxMC02MTI4ODQ2OWJlOWIiLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDYzMzg3MDUsImV4cCI6MTc0NjQyNTEwNX0.gjQUUkiCBC6aHHJS9es1F3zebbbmAtZWXiKtSq_iY9g
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxN2Q5YTZiMy01N2Y5LTQyN2UtODUxMC02MTI4ODQ2OWJlOWIiLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDYzMzg3MDUsImV4cCI6MTc0NjQyNTEwNX0.gjQUUki CBC6aHHJS9es1F3zebbbmAtZWXiKtSq_iY9g
 
 # 翻译记录详情 Response
 # {
@@ -134,7 +134,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxN2Q5Y
 ### 删除翻译记录
 DELETE  http://localhost:3000/api/v1/translation/delete/c572993e-098f-4874-8230-24d8ef2349a4
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxN2Q5YTZiMy01N2Y5LTQyN2UtODUxMC02MTI4ODQ2OWJlOWIiLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDYzMzg3MDUsImV4cCI6MTc0NjQyNTEwNX0.gjQUUkiCBC6aHHJS9es1F3zebbbmAtZWXiKtSq_iY9g
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxN2Q5YTZiMy01N2Y5LTQyN2UtODUxMC02MTI4ODQ2OWJlOWIiLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDYzMzg3MDUsImV4cCI6MTc0NjQyNTEwNX0.gjQUUki CBC6aHHJS9es1F3zebbbmAtZWXiKtSq_iY9g
 
 # 删除翻译记录 Response
 # {
@@ -145,6 +145,132 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxN2Q5Y
 #   },
 #   "timestamp": "2025-05-04T15:24:36.098Z"
 # }
+
+### 流式文本总结
+POST http://localhost:3000/api/v1/translation/summarize
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxN2Q5YTZiMy01N2Y5LTQyN2UtODUxMC02MTI4ODQ2OWJlOWIiLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDY0MTA2MDcsImV4cCI6MTc0NjQ5NzAwN30.AccclGF7thmxvO0zemSs-KC7ZYLxmvRwIUSUPRxjjAk
+
+{
+  "text": "啦啦啦啦啦啦 我是卖报的小行家 ",
+  "language": "中文"
+}
+
+# 流式文本总结 Response
+# data: {"content":"人工智"}
+
+# data: {"content":"能正"}
+
+# data: {"content":"在深"}
+
+# data: {"content":"刻影"}
+
+# data: {"content":"响社"}
+
+# data: {"content":"会的"}
+
+# data: {"content":"方"}
+
+# data: {"content":"方面面，"}
+
+# data: {"content":"包"}
+
+# data: {"content":"括医疗"}
+
+# data: {"content":"、交通、"}
+
+# data: {"content":"教育等领"}
+
+# data: {"content":"域。AI "}
+
+# data: {"content":"技"}
+
+# data: {"content":"术为"}
+
+# data: {"content":"这"}
+
+# data: {"content":"些领域带"}
+
+# data: {"content":"来了"}
+
+# data: {"content":"诸多进"}
+
+# data: {"content":"步和"}
+
+# data: {"content":"便"}
+
+# data: {"content":"利，"}
+
+# data: {"content":"但同时也"}
+
+# data: {"content":"引"}
+
+# data: {"content":"发"}
+
+# data: {"content":"了就"}
+
+# data: {"content":"业市场变"}
+
+# data: {"content":"化、隐"}
+
+# data: {"content":"私保护和"}
+
+# data: {"content":"数据安全"}
+
+# data: {"content":"等问题。"}
+
+# data: {"content":"为"}
+
+# data: {"content":"了确"}
+
+# data: {"content":"保 "}
+
+# data: {"content":"AI 的健"}
+
+# data: {"content":"康发展，"}
+
+# data: {"content":"在"}
+
+# data: {"content":"鼓励创"}
+
+# data: {"content":"新的同时"}
+
+# data: {"content":","}
+
+# data: {"content":"还"}
+
+# data: {"content":"需要制"}
+
+# data: {"content":"定合理的"}
+
+# data: {"content":"伦理和"}
+
+# data: {"content":"监管措"}
+
+# data: {"content":"施。"}
+
+# data: [DONE]
+
+
+### 流式文本总结（其他语言）
+POST http://localhost:3000/api/v1/translation/summarize
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxN2Q5YTZiMy01N2Y5LTQyN2UtODUxMC02MTI4ODQ2OWJlOWIiLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDY0MTA2MDcsImV4cCI6MTc0NjQ5NzAwN30.AccclGF7thmxvO0zemSs-KC7ZYLxmvRwIUSUPRxjjAk
+
+{
+  "text": "人工智能（AI）的发展正在深刻改变我们的社会和经济。在医疗领域，AI算法可以分析医学图像并辅助诊断；在交通领域，自动驾驶技术不断进步；在教育方面，个性化学习系统变得越来越普及。然而，AI的发展也带来了就业市场变化、隐私保护、数据安全等多方面的挑战。我们需要在促进创新的同时，建立合理的伦理准则和监管框架，确保AI的发展造福人类社会。",
+  "language": "English"
+}
+
+### 流式文本总结（清理换行符）
+POST http://localhost:3000/api/v1/translation/summarize?cleanFormat=true
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxN2Q5YTZiMy01N2Y5LTQyN2UtODUxMC02MTI4ODQ2OWJlOWIiLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDY0MTA2MDcsImV4cCI6MTc0NjQ5NzAwN30.AccclGF7thmxvO0zemSs-KC7ZYLxmvRwIUSUPRxjjAk
+
+{
+  "text": "人工智能（AI）的发展正在深刻改变我们的社会和经济。在医疗领域，AI算法可以分析医学图像并辅助诊断；在交通领域，自动驾驶技术不断进步；在教育方面，个性化学习系统变得越来越普及。然而，AI的发展也带来了就业市场变化、隐私保护、数据安全等多方面的挑战。我们需要在促进创新的同时，建立合理的伦理准则和监管框架，确保AI的发展造福人类社会。",
+  "language": "法语"
+}
 
 
 
