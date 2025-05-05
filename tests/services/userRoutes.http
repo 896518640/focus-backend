@@ -11,6 +11,17 @@ Content-Type: application/json
   "password": "admin1"
 }
 
+### 登录成功响应
+# {
+#   "code": 0,
+#   "success": true,
+#   "message": "登录成功",
+#   "data": {
+#     "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxN2Q5YTZiMy01N2Y5LTQyN2UtODUxMC02MTI4ODQ2OWJlOWIiLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDY0MzI3MjgsImV4cCI6MTc0NjUxOTEyOH0.XNzIr0HlVzYfwA-wLUP3LX4ecAsOPIHr3JQ8Ol5eKxk"
+#   },
+#   "timestamp": "2025-05-05T08:12:08.863Z"
+# }
+
 ### 用户注册
 POST http://localhost:3000/api/v1/user/auth/register
 Content-Type: application/json
@@ -18,20 +29,75 @@ Content-Type: application/json
 {
   "username": "newuser",
   "email": "newuser@example.com",
-  "password": "securepassword"
+  "password": "admin1"
 }
+
+### 注册成功响应
+# {
+#   "code": 0,
+#   "success": true,
+#   "message": "注册成功",
+#   "data": {
+#     "id": "d45b0356-d6c0-4b22-bb61-ae8eda1d3932",
+#     "username": "newuser",
+#     "email": "newuser@example.com"
+#   },
+#   "timestamp": "2025-05-05T08:12:35.947Z"
+# }
 
 ### 获取当前用户基本信息
 GET http://localhost:3000/api/v1/user/me
 Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxN2Q5YTZiMy01N2Y5LTQyN2UtODUxMC02MTI4ODQ2OWJlOWIiLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDY0MzExNDksImV4cCI6MTc0NjUxNzU0OX0.1N30jhRQqMNDvTvnet4R_Hbs6l8g6VIFLNRwxoaiMuE
 
-## 用户资料接口
+### 获取用户信息成功响应
+# {
+#   "code": 0,
+#   "success": true,
+#   "message": "获取用户信息成功",
+#   "data": {
+#     "id": "17d9a6b3-57f9-427e-8510-61288469be9b",
+#     "username": "admin",
+#     "email": "1@qq.com",
+#     "role": "user",
+#     "createdAt": "2025-04-02T17:05:40.505Z",
+#     "lastLoginAt": "2025-05-05T08:12:08.850Z"
+#   },
+#   "timestamp": "2025-05-05T08:12:56.405Z"
+# }
+
 
 ### 获取用户详细资料
 GET http://localhost:3000/api/v1/user/profile
 Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxN2Q5YTZiMy01N2Y5LTQyN2UtODUxMC02MTI4ODQ2OWJlOWIiLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDY0MzExNDksImV4cCI6MTc0NjUxNzU0OX0.1N30jhRQqMNDvTvnet4R_Hbs6l8g6VIFLNRwxoaiMuE
+
+### 获取用户详细资料成功响应
+# {
+#   "code": 0,
+#   "success": true,
+#   "message": "获取用户详细资料成功",
+#   "data": {
+#     "id": "17d9a6b3-57f9-427e-8510-61288469be9b",
+#     "username": "admin",
+#     "email": "1@qq.com",
+#     "avatar": "https://example.com/avatar.png",
+#     "role": "user",
+#     "createdAt": "2025-04-02T17:05:40.505Z",
+#     "lastLoginAt": "2025-05-05T08:12:08.850Z",
+#     "settings": null,
+#     "usageStats": {
+#       "id": "65c7f7f6-7b20-4f60-9540-3b897168799a",
+#       "studyHours": 0,
+#       "recognitionCount": 0,
+#       "fileCount": 0,
+#       "translationCount": 10,
+#       "summaryCount": 0,
+#       "userId": "17d9a6b3-57f9-427e-8510-61288469be9b"
+#     }
+#   },
+#   "timestamp": "2025-05-05T08:13:19.457Z"
+# }
 
 ### 更新用户资料
 PUT http://localhost:3000/api/v1/user/profile
@@ -43,7 +109,21 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxN2Q5Y
   "avatar": "https://example.com/avatar.png"
 }
 
-## 用户活动接口
+### 更新用户资料成功响应
+# {
+#   "code": 0,
+#   "success": true,
+#   "message": "更新用户资料成功",
+#   "data": {
+#     "id": "17d9a6b3-57f9-427e-8510-61288469be9b",
+#     "username": "admin",
+#     "avatar": "https://example.com/avatar.png"
+#   },
+#   "timestamp": "2025-05-05T08:13:46.181Z"
+# }
+
+
+### 以下接口未实现
 
 ### 获取用户活动记录
 GET http://localhost:3000/api/v1/user/activities

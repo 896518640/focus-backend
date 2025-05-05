@@ -17,6 +17,14 @@
     {
       "name": "OpenAI API",
       "description": "OpenAI/OpenRouter 集成相关API"
+    },
+    {
+      "name": "用户管理",
+      "description": "用户资料、活动和设置管理相关API"
+    },
+    {
+      "name": "认证",
+      "description": "用户认证、登录和注册相关API"
     }
   ],
   "paths": {
@@ -1250,6 +1258,612 @@
           }
         }
       }
+    },
+    "/api/user/profile": {
+      "get": {
+        "summary": "获取用户个人资料",
+        "description": "获取当前登录用户的详细个人资料，包括基本信息、会员状态、使用统计和最近活动",
+        "tags": [
+          "用户管理"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功获取用户资料",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "获取用户资料成功"
+                    },
+                    "data": {
+                      "type": "object",
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/userProfile"
+                        },
+                        {
+                          "properties": {
+                            "settings": {
+                              "$ref": "#/components/schemas/userSettings"
+                            },
+                            "usageStats": {
+                              "$ref": "#/components/schemas/usageStats"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "未授权，需要登录"
+          },
+          "404": {
+            "description": "用户不存在"
+          },
+          "500": {
+            "description": "服务器错误"
+          }
+        }
+      },
+      "put": {
+        "summary": "更新用户个人资料",
+        "description": "更新当前登录用户的基本个人资料信息",
+        "tags": [
+          "用户管理"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": {
+                    "type": "string",
+                    "description": "用户名（登录账号）",
+                    "example": "newUsername123"
+                  },
+                  "displayName": {
+                    "type": "string",
+                    "description": "用户显示名称",
+                    "example": "张三"
+                  },
+                  "avatar": {
+                    "type": "string",
+                    "description": "头像URL",
+                    "example": "https://example.com/new-avatar.png"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功更新用户资料",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "更新用户资料成功"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "example": "123e4567-e89b-12d3-a456-426614174000"
+                        },
+                        "username": {
+                          "type": "string",
+                          "example": "newUsername123"
+                        },
+                        "displayName": {
+                          "type": "string",
+                          "example": "张三"
+                        },
+                        "avatar": {
+                          "type": "string",
+                          "example": "https://example.com/new-avatar.png"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "用户名已存在"
+          },
+          "401": {
+            "description": "未授权，需要登录"
+          },
+          "500": {
+            "description": "服务器错误"
+          }
+        }
+      }
+    },
+    "/api/user/activities": {
+      "get": {
+        "summary": "获取用户活动记录",
+        "description": "分页获取当前登录用户的活动记录",
+        "tags": [
+          "用户管理"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "页码，默认为1"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            },
+            "description": "每页条数，默认为10"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功获取活动记录",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "获取活动记录成功"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "activities": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/activity"
+                          }
+                        },
+                        "pagination": {
+                          "type": "object",
+                          "properties": {
+                            "page": {
+                              "type": "integer",
+                              "example": 1
+                            },
+                            "limit": {
+                              "type": "integer",
+                              "example": 10
+                            },
+                            "total": {
+                              "type": "integer",
+                              "example": 25
+                            },
+                            "pages": {
+                              "type": "integer",
+                              "example": 3
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "未授权，需要登录"
+          },
+          "500": {
+            "description": "服务器错误"
+          }
+        }
+      }
+    },
+    "/api/user/stats": {
+      "get": {
+        "summary": "获取用户使用统计",
+        "description": "获取当前登录用户的使用统计数据",
+        "tags": [
+          "用户管理"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功获取使用统计",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "获取使用统计成功"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/usageStats"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "未授权，需要登录"
+          },
+          "500": {
+            "description": "服务器错误"
+          }
+        }
+      }
+    },
+    "/api/user/settings": {
+      "put": {
+        "summary": "更新用户设置",
+        "description": "更新当前登录用户的应用设置",
+        "tags": [
+          "用户管理"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/userSettings"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功更新设置",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "更新设置成功"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/userSettings"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "未授权，需要登录"
+          },
+          "500": {
+            "description": "服务器错误"
+          }
+        }
+      }
+    },
+    "/api/user/activity": {
+      "post": {
+        "summary": "记录用户活动",
+        "description": "为当前登录用户创建一条新的活动记录",
+        "tags": [
+          "用户管理"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "title",
+                  "type"
+                ],
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "description": "活动标题",
+                    "example": "上传了音频文件"
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "活动详细描述",
+                    "example": "用户上传了一个音频文件进行转写"
+                  },
+                  "type": {
+                    "type": "string",
+                    "description": "活动类型",
+                    "example": "upload"
+                  },
+                  "icon": {
+                    "type": "string",
+                    "description": "活动图标",
+                    "example": "upload"
+                  },
+                  "iconBg": {
+                    "type": "string",
+                    "description": "活动图标背景色",
+                    "example": "#4caf50"
+                  },
+                  "audioJobId": {
+                    "type": "string",
+                    "description": "关联的音频任务ID",
+                    "example": "job_123456"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功记录活动",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "记录活动成功"
+                    },
+                    "data": {
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/activity"
+                        },
+                        {
+                          "properties": {
+                            "userId": {
+                              "type": "string",
+                              "example": "123e4567-e89b-12d3-a456-426614174000"
+                            },
+                            "audioJobId": {
+                              "type": "string",
+                              "example": "job_123456"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "未授权，需要登录"
+          },
+          "500": {
+            "description": "服务器错误"
+          }
+        }
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "summary": "用户登录",
+        "description": "处理用户登录请求，返回JWT令牌",
+        "tags": [
+          "认证"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/loginRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "登录成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "登录成功"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/loginResponse"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "用户名或密码错误"
+          },
+          "403": {
+            "description": "账户已被禁用"
+          },
+          "500": {
+            "description": "服务器错误"
+          }
+        }
+      }
+    },
+    "/api/auth/register": {
+      "post": {
+        "summary": "用户注册",
+        "description": "创建新用户账号",
+        "tags": [
+          "认证"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/registerRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "注册成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "注册成功"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/registerResponse"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "用户名或邮箱已被使用"
+          },
+          "500": {
+            "description": "服务器错误"
+          }
+        }
+      }
+    },
+    "/api/auth/me": {
+      "get": {
+        "summary": "获取当前用户信息",
+        "description": "通过JWT令牌获取当前登录用户的信息",
+        "tags": [
+          "认证"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功获取用户信息",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "获取用户信息成功"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/userProfile"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "未授权，需要登录"
+          },
+          "404": {
+            "description": "用户不存在"
+          },
+          "500": {
+            "description": "服务器错误"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -2005,6 +2619,216 @@
             "example": "你好，请介绍一下自己"
           }
         }
+      },
+      "userProfile": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "username": {
+            "type": "string",
+            "example": "user123"
+          },
+          "displayName": {
+            "type": "string",
+            "example": "张三"
+          },
+          "email": {
+            "type": "string",
+            "example": "user@example.com"
+          },
+          "avatar": {
+            "type": "string",
+            "example": "https://example.com/avatar.png"
+          },
+          "role": {
+            "type": "string",
+            "example": "user"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastLoginAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "userSettings": {
+        "type": "object",
+        "properties": {
+          "defaultSourceLanguage": {
+            "type": "string",
+            "example": "zh_cn"
+          },
+          "defaultTargetLanguage": {
+            "type": "string",
+            "example": "en_us"
+          },
+          "autoTranslate": {
+            "type": "boolean",
+            "example": true
+          },
+          "autoSpeak": {
+            "type": "boolean",
+            "example": false
+          },
+          "speechRate": {
+            "type": "number",
+            "example": 1
+          },
+          "theme": {
+            "type": "string",
+            "example": "system"
+          }
+        }
+      },
+      "usageStats": {
+        "type": "object",
+        "properties": {
+          "studyHours": {
+            "type": "number",
+            "example": 10.5
+          },
+          "recognitionCount": {
+            "type": "integer",
+            "example": 25
+          },
+          "fileCount": {
+            "type": "integer",
+            "example": 15
+          },
+          "translationCount": {
+            "type": "integer",
+            "example": 30
+          },
+          "summaryCount": {
+            "type": "integer",
+            "example": 20
+          }
+        }
+      },
+      "activity": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "title": {
+            "type": "string",
+            "example": "上传了音频文件"
+          },
+          "description": {
+            "type": "string",
+            "example": "用户上传了一个音频文件进行转写"
+          },
+          "type": {
+            "type": "string",
+            "example": "upload"
+          },
+          "icon": {
+            "type": "string",
+            "example": "upload"
+          },
+          "iconBg": {
+            "type": "string",
+            "example": "#4caf50"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "loginRequest": {
+        "type": "object",
+        "required": [
+          "username",
+          "password"
+        ],
+        "properties": {
+          "username": {
+            "type": "string",
+            "description": "用户名",
+            "example": "admin"
+          },
+          "password": {
+            "type": "string",
+            "description": "密码",
+            "example": "password123"
+          }
+        }
+      },
+      "loginResponse": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInVzZXJuYW1lIjoiYWRtaW4iLCJpYXQiOjE2MTU1MjQwMDAsImV4cCI6MTYxNTYxMDQwMH0.jLX4BXVrfwQxfInpnwpDXrZWxKGaRVuHwVmsjdCLxYA"
+          }
+        }
+      },
+      "registerRequest": {
+        "type": "object",
+        "required": [
+          "username",
+          "email",
+          "password"
+        ],
+        "properties": {
+          "username": {
+            "type": "string",
+            "description": "用户名（登录账号）",
+            "example": "newuser"
+          },
+          "displayName": {
+            "type": "string",
+            "description": "用户显示名称（如未提供，将自动生成）",
+            "example": "张三"
+          },
+          "email": {
+            "type": "string",
+            "description": "电子邮箱",
+            "example": "user@example.com"
+          },
+          "password": {
+            "type": "string",
+            "description": "密码",
+            "example": "password123"
+          }
+        }
+      },
+      "registerResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "username": {
+            "type": "string",
+            "example": "newuser"
+          },
+          "displayName": {
+            "type": "string",
+            "example": "张三"
+          },
+          "email": {
+            "type": "string",
+            "example": "user@example.com"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
       }
     }
   }

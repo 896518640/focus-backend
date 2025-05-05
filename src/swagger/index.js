@@ -9,6 +9,10 @@ import translationSchemas from './schemas/translation.js';
 import translationPaths from './paths/translation.js';
 import * as openaiSchemas from './schemas/openai.js';
 import { openaiPaths } from './paths/openai.js';
+import userSchemas from './schemas/user.js';
+import authSchemas from './schemas/auth.js';
+import { userPaths } from './paths/user.js';
+import { authPaths } from './paths/auth.js';
 
 export default {
   openapi: '3.0.0',
@@ -29,6 +33,14 @@ export default {
     {
       name: 'OpenAI API',
       description: 'OpenAI/OpenRouter 集成相关API'
+    },
+    {
+      name: '用户管理',
+      description: '用户资料、活动和设置管理相关API'
+    },
+    {
+      name: '认证',
+      description: '用户认证、登录和注册相关API'
     }
     // 可以添加其他标签
   ],
@@ -36,6 +48,8 @@ export default {
     ...tingwuPaths,
     ...translationPaths,
     ...openaiPaths,
+    ...userPaths,
+    ...authPaths,
     // 其他路径可以在这里添加
   },
   components: {
@@ -43,7 +57,16 @@ export default {
       ...tingwuSchemas,
       ...translationSchemas,
       ...openaiSchemas,
+      ...userSchemas,
+      ...authSchemas,
       // 其他模型可以在这里添加
+    },
+    securitySchemes: {
+      bearerAuth: {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT'
+      }
     }
   }
 }; 

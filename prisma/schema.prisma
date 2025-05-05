@@ -10,6 +10,7 @@ datasource db {
 model User {
   id           String        @id @default(uuid())
   username     String        @unique
+  displayName  String        // 用户显示名称，必填
   email        String        @unique
   password     String
   avatar       String?

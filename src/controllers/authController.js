@@ -36,39 +36,57 @@ class AuthController extends BaseController {
       const { username, password } = req.body;
 
       // 查找用户
-      const user = await prisma.user.findUnique({
-        where: { username },
+      const user = await prisma.user.findFirst({
+        where: {
+          OR: [
+            { username },
+            { email: username }
+          ]
+        },
+        select: {
+          id: true,
+          username: true,
+          displayName: true,
+          email: true,
+          password: true,
+          role: true,
+          isActive: true
+        }
       });
 
-      // 用户不存在
+      // 检查用户是否存在
       if (!user) {
-        this.logger.warn(`登录失败：用户 ${username} 不存在`);
+        this.logger.warn(`登录失败: 用户"${username}"不存在`);
         return this.fail(res, '用户名或密码错误', null, 401);
       }
 
-      // 用户被禁用
+      // 检查用户状态
       if (!user.isActive) {
-        this.logger.warn(`登录失败：用户 ${username} 已被禁用`);
+        this.logger.warn(`登录失败: 用户"${username}"已被禁用`);
         return this.fail(res, '账户已被禁用，请联系管理员', null, 403);
       }
 
       // 验证密码
       const isPasswordValid = await bcrypt.compare(password, user.password);
       if (!isPasswordValid) {
-        this.logger.warn(`登录失败：用户 ${username} 密码错误`);
+        this.logger.warn(`登录失败: 用户"${username}"密码错误`);
         return this.fail(res, '用户名或密码错误', null, 401);
       }
 
-      // 生成JWT令牌
-      const token = this._generateToken(user);
+      // 创建JWT令牌
+      const token = jwt.sign(
+        { userId: user.id, username: user.username, role: user.role },
+        JWT_SECRET,
+        { expiresIn: JWT_EXPIRES_IN }
+      );
 
       // 更新最后登录时间
       await prisma.user.update({
         where: { id: user.id },
-        data: { lastLoginAt: new Date() },
+        data: { lastLoginAt: new Date() }
       });
 
-      this.logger.info(`用户 ${username} 登录成功`);
+      this.logger.info(`用户"${username}"登录成功`);
       return this.success(res, '登录成功', { token });
     } catch (error) {
       this.logger.error('登录处理发生错误:', error);
@@ -83,7 +101,7 @@ class AuthController extends BaseController {
    */
   async register(req, res) {
     try {
-      const { username, email, password } = req.body;
+      const { username, email, password, displayName } = req.body;
 
       // 检查用户名是否已存在
       const existingUser = await prisma.user.findFirst({
@@ -101,6 +119,10 @@ class AuthController extends BaseController {
         return this.fail(res, `${field}已被使用`, null, 400);
       }
 
+      // 生成默认显示名称（FOX_时间戳后6位）
+      const timestamp = Date.now().toString();
+      const defaultDisplayName = `FOX_${timestamp.substring(timestamp.length - 6)}`;
+
       // 加密密码
       const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -110,14 +132,16 @@ class AuthController extends BaseController {
           username,
           email,
           password: hashedPassword,
+          displayName: displayName || defaultDisplayName, // 优先使用提供的displayName，否则使用生成的默认名称
           role: 'user',
         },
       });
 
-      this.logger.info(`新用户注册成功: ${username}`);
+      this.logger.info(`新用户注册成功: ${username}, 显示名称: ${newUser.displayName}`);
       return this.success(res, '注册成功', {
         id: newUser.id,
         username: newUser.username,
+        displayName: newUser.displayName,
         email: newUser.email,
       }, 201);
     } catch (error) {
@@ -127,7 +151,7 @@ class AuthController extends BaseController {
   }
 
   /**
-   * 获取当前用户信息
+   * 获取当前登录用户信息
    * @param {Object} req - 请求对象
    * @param {Object} res - 响应对象
    */
@@ -135,9 +159,8 @@ class AuthController extends BaseController {
     try {
       const userId = req.user?.userId;
       
-      this.logger.info(`尝试获取用户信息，userId: ${userId}`);
+      this.logger.info(`尝试获取当前用户信息，userId: ${userId}`);
       
-      // 检查用户ID是否存在
       if (!userId) {
         this.logger.warn('获取用户信息失败：用户ID不存在');
         return this.fail(res, '未授权，无法获取用户信息', null, 401);
@@ -148,6 +171,7 @@ class AuthController extends BaseController {
         select: {
           id: true,
           username: true,
+          displayName: true,
           email: true,
           role: true,
           createdAt: true,
@@ -156,28 +180,56 @@ class AuthController extends BaseController {
       });
 
       if (!user) {
-        this.logger.warn(`获取用户信息失败：ID为 ${userId} 的用户不存在`);
+        this.logger.warn(`获取用户信息失败：用户ID ${userId} 不存在`);
         return this.fail(res, '用户不存在', null, 404);
       }
 
+      this.logger.info(`成功获取用户信息，userId: ${userId}`);
       return this.success(res, '获取用户信息成功', user);
     } catch (error) {
-      this.logger.error('获取用户信息发生错误:', error);
+      this.logger.error('获取当前用户信息失败:', error);
       return this.fail(res, '服务器错误，请稍后再试', error, 500);
     }
   }
 
   /**
-   * 验证JWT令牌
-   * @param {String} token - JWT令牌
-   * @returns {Object|null} - 解码的用户信息或null
+   * JWT Token验证中间件
+   * @param {Object} req - 请求对象
+   * @param {Object} res - 响应对象
+   * @param {Function} next - 下一个中间件函数
    */
-  verifyToken(token) {
+  verifyToken(req, res, next) {
     try {
-      return jwt.verify(token, JWT_SECRET);
+      const authHeader = req.headers.authorization;
+      
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        this.logger.warn('Token验证失败：未提供授权头或格式错误');
+        return this.fail(res, '未提供有效的授权令牌', null, 401);
+      }
+      
+      const token = authHeader.split(' ')[1];
+      
+      if (!token) {
+        this.logger.warn('Token验证失败：令牌为空');
+        return this.fail(res, '未提供有效的授权令牌', null, 401);
+      }
+      
+      try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        req.user = decoded;
+        next();
+      } catch (error) {
+        if (error.name === 'TokenExpiredError') {
+          this.logger.warn('Token验证失败：令牌已过期');
+          return this.fail(res, '授权令牌已过期，请重新登录', null, 401);
+        }
+        
+        this.logger.warn('Token验证失败：无效的令牌');
+        return this.fail(res, '无效的授权令牌', null, 401);
+      }
     } catch (error) {
-      this.logger.error('Token验证失败:', error);
-      return null;
+      this.logger.error('Token验证过程发生错误:', error);
+      return this.fail(res, '服务器错误，请稍后再试', error, 500);
     }
   }
 

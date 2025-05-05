@@ -13,40 +13,8 @@ const logger = createLogger('AuthMiddleware');
  * @param {Function} next - 下一个中间件函数
  */
 export function authenticate(req, res, next) {
-  try {
-    // 获取请求头中的Authorization
-    const authHeader = req.headers.authorization;
-    
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      logger.warn(`未提供Authorization令牌: ${authHeader} ${JSON.stringify(req.headers)}`);
-      console.log(req.headers);
-      // 打印请求url
-      console.log(req.url);
-      return res.status(401).json(formatResponse(401, '未授权访问，请提供有效Token'));
-    }
-
-    // 提取令牌
-    const token = authHeader.split(' ')[1];
-    
-    // 验证令牌
-    const decoded = authController.verifyToken(token);
-    
-    if (!decoded) {
-      logger.warn('无效的Authorization令牌');
-      return res.status(401).json(formatResponse(401, '令牌无效或已过期'));
-    }
-
-    // 将用户信息附加到请求对象
-    req.user = decoded;
-    
-    logger.debug(`用户认证成功: ${JSON.stringify(decoded)}`);
-    
-    // 继续下一个中间件
-    next();
-  } catch (error) {
-    logger.error('认证中间件错误:', error);
-    return res.status(500).json(formatResponse(500, '服务器错误，请稍后再试'));
-  }
+  // 直接使用authController的verifyToken方法
+  return authController.verifyToken(req, res, next);
 }
 
 /**
