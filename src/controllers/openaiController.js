@@ -45,6 +45,80 @@ class OpenAIController extends BaseController {
   });
 
   /**
+   * 创建流式聊天完成
+   * @param {Object} req - Express请求对象
+   * @param {Object} res - Express响应对象
+   * @returns {Promise<void>}
+   */
+  createStreamingChatCompletion = async (req, res) => {
+    try {
+      // 验证请求体存在
+      if (!req.body) {
+        return this.fail(res, '请求体不能为空', null, 400);
+      }
+
+      // 检查服务是否可用
+      if (!openaiService.isAvailable()) {
+        return this.fail(res, 'OpenAI服务未配置，请联系管理员设置OPENROUTER_API_KEY', null, 503);
+      }
+
+      // 从请求体获取参数
+      const { model, messages, temperature } = req.body;
+      
+      // 验证消息列表存在
+      if (!messages || !Array.isArray(messages) || messages.length === 0) {
+        return this.fail(res, '消息列表不能为空', null, 400);
+      }
+
+      this.logger.info('处理流式聊天请求', { 
+        model: model || 'default', 
+        messagesCount: messages.length 
+      });
+
+      // 设置响应头
+      res.setHeader('Content-Type', 'text/event-stream');
+      res.setHeader('Cache-Control', 'no-cache');
+      res.setHeader('Connection', 'keep-alive');
+      res.flushHeaders();
+
+      // 使用流式API
+      const stream = await openaiService.createStreamingChatCompletion({
+        model,
+        messages,
+        temperature,
+      });
+
+      // 处理流式响应
+      for await (const chunk of stream) {
+        const content = chunk.choices[0]?.delta?.content || '';
+        if (content) {
+          // 清理内容中的多余换行符
+          const cleanedContent = req.query.cleanFormat === 'true' ? 
+            content.replace(/\n+/g, ' ').trim() : content;
+            
+          // 发送事件流格式的数据
+          res.write(`data: ${JSON.stringify({ content: cleanedContent })}\n\n`);
+        }
+      }
+
+      // 发送结束标记
+      res.write('data: [DONE]\n\n');
+      res.end();
+    } catch (error) {
+      this.logger.error('流式聊天完成请求失败', error);
+      
+      // 如果连接仍然打开，则发送错误信息
+      if (!res.headersSent) {
+        return this.fail(res, `流式聊天完成失败: ${error.message}`, null, 500);
+      } else {
+        res.write(`data: ${JSON.stringify({ error: error.message })}\n\n`);
+        res.write('data: [DONE]\n\n');
+        res.end();
+      }
+    }
+  };
+
+  /**
    * 创建简单文本完成（单轮对话）
    * @param {Object} req - Express请求对象
    * @param {Object} res - Express响应对象
@@ -63,7 +137,6 @@ class OpenAIController extends BaseController {
 
     // 从请求体获取参数
     const { prompt, model, temperature } = req.body;
-
     // 验证提示文本存在
     if (!prompt) {
       return this.fail(res, '提示文本不能为空', null, 400);

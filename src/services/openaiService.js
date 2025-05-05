@@ -87,6 +87,43 @@ class OpenAIService extends BaseService {
   }
 
   /**
+   * 创建流式聊天完成
+   * @param {Object} options - 聊天参数
+   * @param {String} options.model - 使用的模型
+   * @param {Array<Object>} options.messages - 消息列表
+   * @param {Number} options.temperature - 温度参数
+   * @returns {Promise<ReadableStream>} 聊天完成流
+   */
+  async createStreamingChatCompletion(options) {
+    try {
+      // 验证必要参数
+      this.validateRequiredParams(options, ['messages']);
+
+      // 确保客户端已初始化
+      if (!this.openai) {
+        throw new Error('OpenAI服务未配置，请在环境变量中设置OPENROUTER_API_KEY');
+      }
+
+      // 设置默认参数
+      const defaultOptions = {
+        model: config.openai.defaultModel || 'openai/gpt-4o',
+        temperature: 0.7,
+        stream: true, // 启用流式传输
+      };
+
+      // 合并参数
+      const requestOptions = { ...defaultOptions, ...options, stream: true };
+      this.logger.debug('创建流式聊天完成', { model: requestOptions.model });
+
+      // 调用流式API
+      return await this.openai.chat.completions.create(requestOptions);
+    } catch (error) {
+      this.logger.error('OpenAI流式聊天完成请求失败', error);
+      throw error;
+    }
+  }
+
+  /**
    * 创建文本完成
    * @param {String} prompt - 提示文本
    * @param {Object} options - 额外选项

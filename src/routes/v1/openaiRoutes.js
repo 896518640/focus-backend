@@ -3,7 +3,7 @@
 
 import express from 'express';
 import openaiController from '../../controllers/openaiController.js';
-import { createRouteHelper, registerRoutes } from '../../utils/routeHelper.js';
+import { createRouteHelper, registerRoutes, createHandler } from '../../utils/routeHelper.js';
 import createLogger from '../../utils/logger.js';
 import { authenticate } from '../../middlewares/authMiddleware.js';
 
@@ -15,6 +15,10 @@ const handler = createRouteHelper(openaiController);
 
 // 使用认证中间件
 router.use(authenticate);
+
+// 为流式聊天完成单独配置路由
+// 注意：使用createHandler专门包装该方法以确保错误处理一致
+router.post('/chat/stream', createHandler(openaiController.createStreamingChatCompletion));
 
 // 定义路由配置
 const routes = [

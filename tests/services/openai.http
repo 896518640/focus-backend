@@ -9,17 +9,82 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxN2Q5Y
   "temperature": 0.5
 }
 
+# {
+#   "success": true,
+#   "message": "AI响应生成成功",
+#   "data": {
+#     "message": {
+#       "role": "assistant",
+#       "content": "你好！我是通义千问，由通义实验室研发的超大规模语言模型。我能够回答问题、创作文字（比如写故事、写公文、写邮件、写剧本等），还能进行逻辑推理、编程、表达观点、玩游戏等。我支持多种语言，包括但不限于中文、英文、德语、法语、西班牙语等。\n\n我的训练数据截止到2024年10月，这意味着我对之前的事件和知识有较丰富的了解。同时，我能够根据对话上下文进行多轮对话，提供更自然的交互体验。如果你有任何问题或需要帮助，随时告诉我，我会尽力为你解答！",
+#       "refusal": null,
+#       "reasoning": "嗯，用户让我介绍一下自己。首先，我需要确定用户的需求是什么。他们可能想了解我的功能、背后的技术，或者如何与我互动。我应该先从基础开始，说明我是通义千问，由通义实验室开发的大语言模型。\n\n接下来，用户可能想知道我能做什么。我需要列举一些主要功能，比如回答问题、创作文字、编程、表达观点等，这样用户能快速了解我的能力。同时，要强调支持多种语言，这样国际用户也会觉得有用。\n\n然后，用户可能对技术细节感兴趣。我需要提到我的参数量和训练数据，但不用太深入，保持简洁。重点是让用户知道我是经过大量数据训练的，有能力处理各种任务。\n\n另外，用户可能想知道如何与我互动。我应该提到可以通过文字或指令与我交互，这样用户知道如何开始使用。还要提到持续学习和优化，说明我会不断进步，保持可靠。\n\n可能用户也有隐私方面的顾虑，所以需要说明对话历史不会保留，保护用户隐私。这一点很重要，能增加用户的信任感。\n\n最后，用友好的语气邀请用户提问，鼓励他们开始使用。保持整体结构清晰，分点列出，但不要用markdown格式，用自然的中文表达。检查是否有遗漏的重要信息，比如应用场景或具体例子，但保持简洁，避免信息过载。\n\n总结一下，我需要覆盖身份、功能、技术背景、使用方式、隐私安全，并以友好的结尾邀请用户互动。这样用户能全面了解我，并且知道如何开始使用。\n"
+#     },
+#     "usage": {
+#       "prompt_tokens": 13,
+#       "completion_tokens": 458,
+#       "total_tokens": 471
+#     },
+#     "model": "qwen/qwen3-235b-a22b"
+#   },
+#   "timestamp": "2025-05-05T04:00:40.330Z"
+# }
+
 ### 创建文本完成
 POST http://localhost:3000/api/v1/openai/completion
+Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxN2Q5YTZiMy01N2Y5LTQyN2UtODUxMC02MTI4ODQ2OWJlOWIiLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDY0MTA2MDcsImV4cCI6MTc0NjQ5NzAwN30.AccclGF7thmxvO0zemSs-KC7ZYLxmvRwIUSUPRxjjAk
 
 {
   "model": "anthropic/claude-3.5-sonnet",
-  "messages": [{"role": "user", "content": "你好 请你介绍一下自己"}],
+  "prompt": "你好 请你介绍一下自己",
   "temperature": 0.5
 }
+
+# {
+#   "success": true,
+#   "message": "AI响应生成成功",
+#   "data": {
+#     "message": {
+#       "role": "assistant",
+#       "content": "你好!我是 Claude,是 Anthropic 开发的 AI 助手。我会用中文和你交流,希望能帮到你。",
+#       "refusal": null,
+#       "reasoning": null
+#     },
+#     "usage": {
+#       "prompt_tokens": 20,
+#       "completion_tokens": 45,
+#       "total_tokens": 65
+#     },
+#     "model": "anthropic/claude-3.5-sonnet"
+#   },
+#   "timestamp": "2025-05-05T04:12:03.508Z"
+# }
 
 
 ### 获取OpenAI配置信息
 GET http://localhost:3000/api/v1/openai/config
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxN2Q5YTZiMy01N2Y5LTQyN2UtODUxMC02MTI4ODQ2OWJlOWIiLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDY0MTA2MDcsImV4cCI6MTc0NjQ5NzAwN30.AccclGF7thmxvO0zemSs-KC7ZYLxmvRwIUSUPRxjjAk
+
+
+### 创建流式聊天完成
+POST http://localhost:3000/api/v1/openai/chat/stream
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxN2Q5YTZiMy01N2Y5LTQyN2UtODUxMC02MTI4ODQ2OWJlOWIiLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDY0MTA2MDcsImV4cCI6MTc0NjQ5NzAwN30.AccclGF7thmxvO0zemSs-KC7ZYLxmvRwIUSUPRxjjAk
+
+{
+  "model": "anthropic/claude-3.5-sonnet",
+  "messages": [{"role": "user", "content": "请你简单介绍一下自己"}],
+  "temperature": 0.5
+}
+
+# 注意：响应是事件流格式，需要使用特殊客户端接收
+# 响应格式示例：
+# data: {"content":"你"}
+# data: {"content":"好"}
+# data: {"content":"！"}
+# ...
+# data: [DONE]
+
+
+
+### 创建流式聊天完成

@@ -57,7 +57,7 @@ class App {
     serviceContainer.register('cacheService', cacheService);
     
     // 动态导入并注册其他服务
-    this.registerServices();
+    // this.registerServices();
     
     this.logger.info(`服务容器初始化完成，已注册服务: ${serviceContainer.getServiceNames().join(', ')}`);
   }
@@ -65,29 +65,29 @@ class App {
   /**
    * 注册所有服务到服务容器
    */
-  async registerServices() {
-    try {
-      // 导入服务模块
-      const { default: fileUploadService } = await import('./services/fileUploadService.js');
-      const { default: transcriptionService } = await import('./services/transcriptionService.js');
-      const { default: tingwuService } = await import('./services/tingwuService.js');
-      const { default: userService } = await import('./services/userService.js');
-      const { default: authService } = await import('./services/authService.js');
-      const { default: openaiService } = await import('./services/openaiService.js');
+  // async registerServices() {
+  //   try {
+  //     // 导入服务模块
+  //     const { default: fileUploadService } = await import('./services/fileUploadService.js');
+  //     const { default: transcriptionService } = await import('./services/transcriptionService.js');
+  //     const { default: tingwuService } = await import('./services/tingwuService.js');
+  //     const { default: userService } = await import('./services/userService.js');
+  //     const { default: authService } = await import('./services/authService.js');
+  //     const { default: openaiService } = await import('./services/openaiService.js');
       
-      // 注册到服务容器
-      serviceContainer.register('fileUploadService', fileUploadService);
-      serviceContainer.register('transcriptionService', transcriptionService);
-      serviceContainer.register('tingwuService', tingwuService);
-      serviceContainer.register('userService', userService);
-      serviceContainer.register('authService', authService);
-      serviceContainer.register('openaiService', openaiService);
+  //     // 注册到服务容器
+  //     serviceContainer.register('fileUploadService', fileUploadService);
+  //     serviceContainer.register('transcriptionService', transcriptionService);
+  //     serviceContainer.register('tingwuService', tingwuService);
+  //     serviceContainer.register('userService', userService);
+  //     serviceContainer.register('authService', authService);
+  //     serviceContainer.register('openaiService', openaiService);
       
-    } catch (error) {
-      this.logger.error('注册服务失败', error);
-      throw error;
-    }
-  }
+  //   } catch (error) {
+  //     this.logger.error('注册服务失败', error);
+  //     throw error;
+  //   }
+  // }
   
   /**
    * 设置Express中间件

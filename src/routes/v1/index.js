@@ -28,7 +28,7 @@ router.use('/user', userRoutes);
 // router.use('/tingwu', tingwuRoutes);
 router.use('/tingwu', mainTingwuRoutes);
 router.use('/translation', translationRoutes);
-router.use('/openai', openaiRoutes);
+router.use('/openai', openaiRoutes);  // 重新启用路由注册
 // 定义主路由配置
 const routes = [
   // 用户相关路由
@@ -81,12 +81,25 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
  */
 const registerAllRoutes = (app, prefix) => {
   try {
+    // 已经明确注册的路由模块名称
+    const explicitlyRegisteredRoutes = [
+      'auth',
+      'user',
+      'tingwu',
+      'translation',
+      'openai'
+    ];
+    
     const routeFiles = fs.readdirSync(__dirname)
       .filter(file => 
         file.endsWith('Routes.js') && 
         file !== 'index.js' && 
         // 排除简化通义听悟路由，因为它会单独注册
-        file !== 'simpleTingwuRoutes.js'
+        file !== 'simpleTingwuRoutes.js' &&
+        // 排除已经明确注册的路由模块
+        !explicitlyRegisteredRoutes.some(route => 
+          file.toLowerCase() === `${route}Routes.js`.toLowerCase()
+        )
       );
     
     for (const file of routeFiles) {
