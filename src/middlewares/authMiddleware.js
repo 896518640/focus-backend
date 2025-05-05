@@ -2,6 +2,7 @@
 
 import authController from '../controllers/authController.js';
 import createLogger from '../utils/logger.js';
+import { formatResponse } from '../utils/responseFormatter.js';
 
 const logger = createLogger('AuthMiddleware');
 
@@ -21,10 +22,7 @@ export function authenticate(req, res, next) {
       console.log(req.headers);
       // 打印请求url
       console.log(req.url);
-      return res.status(401).json({
-        code: 401,
-        message: '未授权访问，请提供有效Token',
-      });
+      return res.status(401).json(formatResponse(401, '未授权访问，请提供有效Token'));
     }
 
     // 提取令牌
@@ -35,23 +33,19 @@ export function authenticate(req, res, next) {
     
     if (!decoded) {
       logger.warn('无效的Authorization令牌');
-      return res.status(401).json({
-        code: 401,
-        message: '令牌无效或已过期',
-      });
+      return res.status(401).json(formatResponse(401, '令牌无效或已过期'));
     }
 
     // 将用户信息附加到请求对象
     req.user = decoded;
     
+    logger.debug(`用户认证成功: ${JSON.stringify(decoded)}`);
+    
     // 继续下一个中间件
     next();
   } catch (error) {
     logger.error('认证中间件错误:', error);
-    return res.status(500).json({
-      code: 500,
-      message: '服务器错误，请稍后再试',
-    });
+    return res.status(500).json(formatResponse(500, '服务器错误，请稍后再试'));
   }
 }
 
@@ -69,29 +63,20 @@ export function authorize(roles) {
       // 确保用户已通过认证
       if (!req.user) {
         logger.warn('未经认证的用户尝试访问受保护资源');
-        return res.status(401).json({
-          code: 401,
-          message: '请先登录',
-        });
+        return res.status(401).json(formatResponse(401, '请先登录'));
       }
       
       // 检查用户角色是否在允许的角色中
       if (!allowedRoles.includes(req.user.role)) {
         logger.warn(`用户 ${req.user.username} 权限不足，尝试访问需要 ${allowedRoles.join(', ')} 角色的资源`);
-        return res.status(403).json({
-          code: 403,
-          message: '权限不足，无法访问此资源',
-        });
+        return res.status(403).json(formatResponse(403, '权限不足，无法访问此资源'));
       }
       
       // 权限验证通过，继续下一个中间件
       next();
     } catch (error) {
       logger.error('授权中间件错误:', error);
-      return res.status(500).json({
-        code: 500,
-        message: '服务器错误，请稍后再试',
-      });
+      return res.status(500).json(formatResponse(500, '服务器错误，请稍后再试'));
     }
   };
 }

@@ -17,7 +17,7 @@ class UserController extends BaseController {
   }
 
   /**
-   * 获取用户个人资料
+   * 获取用户详细资料
    * @param {Object} req - 请求对象
    * @param {Object} res - 响应对象
    * 
@@ -156,71 +156,40 @@ class UserController extends BaseController {
    */
   async getUserProfile(req, res) {
     try {
-      const userId = req.user.id;
-
-      // 获取用户基本信息及关联数据
-      const user = await prisma.user.findUnique({
-        where: { id: userId },
-        include: {
-          membership: true,
-          usageStats: true,
-          settings: true,
-          activities: {
-            orderBy: { createdAt: 'desc' },
-            take: 5, // 只获取最近5条活动
-          },
-        },
-      });
-
-      if (!user) {
-        return res.status(404).json(formatResponse(404, '用户不存在'));
+      const userId = req.user?.userId;
+      
+      this.logger.info(`尝试获取用户详细资料，userId: ${userId}`);
+      
+      // 检查用户ID是否存在
+      if (!userId) {
+        this.logger.warn('获取用户详细资料失败：用户ID不存在');
+        return res.status(401).json(formatResponse(401, '未授权，无法获取用户资料'));
       }
 
-      // 格式化返回数据，排除敏感信息
-      const profile = {
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        avatar: user.avatar,
-        role: user.role,
-        isActive: user.isActive,
-        createdAt: user.createdAt,
-        membership: user.membership ? {
-          type: user.membership.type,
-          isActive: user.membership.isActive,
-          startDate: user.membership.startDate,
-          endDate: user.membership.endDate,
-        } : null,
-        usageStats: user.usageStats || {
-          studyHours: 0,
-          recognitionCount: 0,
-          fileCount: 0,
-          translationCount: 0,
-          summaryCount: 0,
-        },
-        settings: user.settings || {
-          defaultSourceLanguage: 'zh_cn',
-          defaultTargetLanguage: 'en_us',
-          autoTranslate: true,
-          autoSpeak: false,
-          speechRate: 1,
-          theme: 'system',
-        },
-        activities: user.activities.map(activity => ({
-          id: activity.id,
-          title: activity.title,
-          description: activity.description,
-          type: activity.type,
-          icon: activity.icon,
-          iconBg: activity.iconBg,
-          createdAt: activity.createdAt,
-        })),
-      };
+      const userProfile = await prisma.user.findUnique({
+        where: { id: userId },
+        select: {
+          id: true,
+          username: true,
+          email: true,
+          avatar: true,
+          role: true,
+          createdAt: true,
+          lastLoginAt: true,
+          settings: true,
+          usageStats: true
+        }
+      });
 
-      return res.json(formatResponse(0, '获取用户资料成功', profile));
+      if (!userProfile) {
+        this.logger.warn(`获取用户详细资料失败：ID为 ${userId} 的用户不存在`);
+        return res.status(404).json(formatResponse(404, '用户资料不存在'));
+      }
+
+      return res.json(formatResponse(0, '获取用户详细资料成功', userProfile));
     } catch (error) {
-      this.logger.error('获取用户资料失败:', error);
-      return res.status(500).json(formatResponse(500, '服务器错误'));
+      this.logger.error('获取用户详细资料发生错误:', error);
+      return res.status(500).json(formatResponse(500, '服务器错误，请稍后再试'));
     }
   }
 

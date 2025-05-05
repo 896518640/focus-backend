@@ -1,0 +1,87 @@
+### 用户统一路由API测试
+
+## 认证相关接口
+
+### 用户登录
+POST http://localhost:3000/api/v1/user/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "admin1"
+}
+
+### 用户注册
+POST http://localhost:3000/api/v1/user/auth/register
+Content-Type: application/json
+
+{
+  "username": "newuser",
+  "email": "newuser@example.com",
+  "password": "securepassword"
+}
+
+### 获取当前用户基本信息
+GET http://localhost:3000/api/v1/user/me
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxN2Q5YTZiMy01N2Y5LTQyN2UtODUxMC02MTI4ODQ2OWJlOWIiLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDY0MzExNDksImV4cCI6MTc0NjUxNzU0OX0.1N30jhRQqMNDvTvnet4R_Hbs6l8g6VIFLNRwxoaiMuE
+
+## 用户资料接口
+
+### 获取用户详细资料
+GET http://localhost:3000/api/v1/user/profile
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxN2Q5YTZiMy01N2Y5LTQyN2UtODUxMC02MTI4ODQ2OWJlOWIiLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDY0MTA2MDcsImV4cCI6MTc0NjQ5NzAwN30.AccclGF7thmxvO0zemSs-KC7ZYLxmvRwIUSUPRxjjAk
+
+### 更新用户资料
+PUT http://localhost:3000/api/v1/user/profile
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxN2Q5YTZiMy01N2Y5LTQyN2UtODUxMC02MTI4ODQ2OWJlOWIiLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDY0MTA2MDcsImV4cCI6MTc0NjQ5NzAwN30.AccclGF7thmxvO0zemSs-KC7ZYLxmvRwIUSUPRxjjAk
+
+{
+  "username": "admin",
+  "avatar": "https://example.com/avatar.png"
+}
+
+## 用户活动接口
+
+### 获取用户活动记录
+GET http://localhost:3000/api/v1/user/activities
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxN2Q5YTZiMy01N2Y5LTQyN2UtODUxMC02MTI4ODQ2OWJlOWIiLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDY0MTA2MDcsImV4cCI6MTc0NjQ5NzAwN30.AccclGF7thmxvO0zemSs-KC7ZYLxmvRwIUSUPRxjjAk
+
+### 记录用户活动
+POST http://localhost:3000/api/v1/user/activities
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxN2Q5YTZiMy01N2Y5LTQyN2UtODUxMC02MTI4ODQ2OWJlOWIiLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDY0MTA2MDcsImV4cCI6MTc0NjQ5NzAwN30.AccclGF7thmxvO0zemSs-KC7ZYLxmvRwIUSUPRxjjAk
+
+{
+  "title": "测试活动",
+  "description": "用户进行了测试操作",
+  "type": "test",
+  "icon": "test",
+  "iconBg": "#0088ff"
+}
+
+## 用户统计接口
+
+### 获取用户使用统计
+GET http://localhost:3000/api/v1/user/stats
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxN2Q5YTZiMy01N2Y5LTQyN2UtODUxMC02MTI4ODQ2OWJlOWIiLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDY0MTA2MDcsImV4cCI6MTc0NjQ5NzAwN30.AccclGF7thmxvO0zemSs-KC7ZYLxmvRwIUSUPRxjjAk
+
+## 用户设置接口
+
+### 更新用户设置
+PUT http://localhost:3000/api/v1/user/settings
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxN2Q5YTZiMy01N2Y5LTQyN2UtODUxMC02MTI4ODQ2OWJlOWIiLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDY0MTA2MDcsImV4cCI6MTc0NjQ5NzAwN30.AccclGF7thmxvO0zemSs-KC7ZYLxmvRwIUSUPRxjjAk
+
+{
+  "defaultSourceLanguage": "zh_cn",
+  "defaultTargetLanguage": "en_us",
+  "autoTranslate": true,
+  "autoSpeak": false,
+  "speechRate": 1.2,
+  "theme": "dark"
+} 
