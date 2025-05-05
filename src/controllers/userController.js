@@ -3,7 +3,6 @@
 
 import BaseController from './BaseController.js';
 import { PrismaClient } from '@prisma/client';
-import { formatResponse } from '../utils/responseFormatter.js';
 
 const prisma = new PrismaClient();
 
@@ -163,7 +162,7 @@ class UserController extends BaseController {
       // 检查用户ID是否存在
       if (!userId) {
         this.logger.warn('获取用户详细资料失败：用户ID不存在');
-        return res.status(401).json(formatResponse(401, '未授权，无法获取用户资料'));
+        return this.fail(res, '未授权，无法获取用户资料', null, 401);
       }
 
       const userProfile = await prisma.user.findUnique({
@@ -183,13 +182,13 @@ class UserController extends BaseController {
 
       if (!userProfile) {
         this.logger.warn(`获取用户详细资料失败：ID为 ${userId} 的用户不存在`);
-        return res.status(404).json(formatResponse(404, '用户资料不存在'));
+        return this.fail(res, '用户资料不存在', null, 404);
       }
 
-      return res.json(formatResponse(0, '获取用户详细资料成功', userProfile));
+      return this.success(res, '获取用户详细资料成功', userProfile);
     } catch (error) {
       this.logger.error('获取用户详细资料发生错误:', error);
-      return res.status(500).json(formatResponse(500, '服务器错误，请稍后再试'));
+      return this.fail(res, '服务器错误，请稍后再试', error, 500);
     }
   }
 
@@ -256,7 +255,16 @@ class UserController extends BaseController {
    */
   async updateUserProfile(req, res) {
     try {
-      const userId = req.user.id;
+      const userId = req.user?.userId;
+      
+      this.logger.info(`尝试更新用户资料，userId: ${userId}`);
+      
+      // 检查用户ID是否存在
+      if (!userId) {
+        this.logger.warn('更新用户资料失败：用户ID不存在');
+        return this.fail(res, '未授权，无法更新用户资料', null, 401);
+      }
+      
       const { username, avatar } = req.body;
 
       // 更新用户基本信息
@@ -268,17 +276,18 @@ class UserController extends BaseController {
         },
       });
 
-      return res.json(formatResponse(0, '更新用户资料成功', {
+      this.logger.info(`用户 ${userId} 资料更新成功`);
+      return this.success(res, '更新用户资料成功', {
         id: updatedUser.id,
         username: updatedUser.username,
         avatar: updatedUser.avatar,
-      }));
+      });
     } catch (error) {
       this.logger.error('更新用户资料失败:', error);
       if (error.code === 'P2002') {
-        return res.status(400).json(formatResponse(400, '用户名已存在'));
+        return this.fail(res, '用户名已存在', error, 400);
       }
-      return res.status(500).json(formatResponse(500, '服务器错误'));
+      return this.fail(res, '服务器错误，请稍后再试', error, 500);
     }
   }
 
@@ -373,7 +382,16 @@ class UserController extends BaseController {
    */
   async getUserActivities(req, res) {
     try {
-      const userId = req.user.id;
+      const userId = req.user?.userId;
+      
+      this.logger.info(`尝试获取用户活动记录，userId: ${userId}`);
+      
+      // 检查用户ID是否存在
+      if (!userId) {
+        this.logger.warn('获取用户活动记录失败：用户ID不存在');
+        return this.fail(res, '未授权，无法获取用户活动记录', null, 401);
+      }
+      
       const { page = 1, limit = 10 } = req.query;
       const skip = (parseInt(page) - 1) * parseInt(limit);
 
@@ -390,7 +408,8 @@ class UserController extends BaseController {
         where: { userId },
       });
 
-      return res.json(formatResponse(0, '获取活动记录成功', {
+      this.logger.info(`用户 ${userId} 活动记录获取成功，共 ${activities.length} 条`);
+      return this.success(res, '获取活动记录成功', {
         activities,
         pagination: {
           page: parseInt(page),
@@ -398,10 +417,10 @@ class UserController extends BaseController {
           total,
           pages: Math.ceil(total / parseInt(limit)),
         },
-      }));
+      });
     } catch (error) {
       this.logger.error('获取活动记录失败:', error);
-      return res.status(500).json(formatResponse(500, '服务器错误'));
+      return this.fail(res, '服务器错误，请稍后再试', error, 500);
     }
   }
 
@@ -457,7 +476,15 @@ class UserController extends BaseController {
    */
   async getUserStats(req, res) {
     try {
-      const userId = req.user.id;
+      const userId = req.user?.userId;
+      
+      this.logger.info(`尝试获取用户使用统计，userId: ${userId}`);
+      
+      // 检查用户ID是否存在
+      if (!userId) {
+        this.logger.warn('获取用户使用统计失败：用户ID不存在');
+        return this.fail(res, '未授权，无法获取用户使用统计', null, 401);
+      }
 
       // 获取或创建用户统计数据
       let stats = await prisma.usageStats.findUnique({
@@ -470,10 +497,11 @@ class UserController extends BaseController {
         });
       }
 
-      return res.json(formatResponse(0, '获取使用统计成功', stats));
+      this.logger.info(`用户 ${userId} 使用统计获取成功`);
+      return this.success(res, '获取使用统计成功', stats);
     } catch (error) {
       this.logger.error('获取使用统计失败:', error);
-      return res.status(500).json(formatResponse(500, '服务器错误'));
+      return this.fail(res, '服务器错误，请稍后再试', error, 500);
     }
   }
 
@@ -563,7 +591,16 @@ class UserController extends BaseController {
    */
   async updateUserSettings(req, res) {
     try {
-      const userId = req.user.id;
+      const userId = req.user?.userId;
+      
+      this.logger.info(`尝试更新用户设置，userId: ${userId}`);
+      
+      // 检查用户ID是否存在
+      if (!userId) {
+        this.logger.warn('更新用户设置失败：用户ID不存在');
+        return this.fail(res, '未授权，无法更新用户设置', null, 401);
+      }
+      
       const settings = req.body;
 
       // 验证设置字段
@@ -593,10 +630,11 @@ class UserController extends BaseController {
         },
       });
 
-      return res.json(formatResponse(0, '更新设置成功', updatedSettings));
+      this.logger.info(`用户 ${userId} 设置更新成功`);
+      return this.success(res, '更新设置成功', updatedSettings);
     } catch (error) {
       this.logger.error('更新设置失败:', error);
-      return res.status(500).json(formatResponse(500, '服务器错误'));
+      return this.fail(res, '服务器错误，请稍后再试', error, 500);
     }
   }
 
@@ -698,7 +736,16 @@ class UserController extends BaseController {
    */
   async recordActivity(req, res) {
     try {
-      const userId = req.user.id;
+      const userId = req.user?.userId;
+      
+      this.logger.info(`尝试记录用户活动，userId: ${userId}`);
+      
+      // 检查用户ID是否存在
+      if (!userId) {
+        this.logger.warn('记录用户活动失败：用户ID不存在');
+        return this.fail(res, '未授权，无法记录用户活动', null, 401);
+      }
+      
       const { title, description, type, icon, iconBg, audioJobId } = req.body;
 
       // 创建活动记录
@@ -714,10 +761,11 @@ class UserController extends BaseController {
         },
       });
 
-      return res.json(formatResponse(0, '记录活动成功', activity));
+      this.logger.info(`用户 ${userId} 活动记录成功，类型: ${type}`);
+      return this.success(res, '记录活动成功', activity);
     } catch (error) {
       this.logger.error('记录活动失败:', error);
-      return res.status(500).json(formatResponse(500, '服务器错误'));
+      return this.fail(res, '服务器错误，请稍后再试', error, 500);
     }
   }
 }

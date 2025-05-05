@@ -6,7 +6,6 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { PrismaClient } from '@prisma/client';
 import createLogger from '../utils/logger.js';
-import { formatResponse } from '../utils/responseFormatter.js';
 
 // 创建Prisma客户端实例
 const prisma = new PrismaClient();
@@ -44,20 +43,20 @@ class AuthController extends BaseController {
       // 用户不存在
       if (!user) {
         this.logger.warn(`登录失败：用户 ${username} 不存在`);
-        return res.status(401).json(formatResponse(401, '用户名或密码错误'));
+        return this.fail(res, '用户名或密码错误', null, 401);
       }
 
       // 用户被禁用
       if (!user.isActive) {
         this.logger.warn(`登录失败：用户 ${username} 已被禁用`);
-        return res.status(403).json(formatResponse(403, '账户已被禁用，请联系管理员'));
+        return this.fail(res, '账户已被禁用，请联系管理员', null, 403);
       }
 
       // 验证密码
       const isPasswordValid = await bcrypt.compare(password, user.password);
       if (!isPasswordValid) {
         this.logger.warn(`登录失败：用户 ${username} 密码错误`);
-        return res.status(401).json(formatResponse(401, '用户名或密码错误'));
+        return this.fail(res, '用户名或密码错误', null, 401);
       }
 
       // 生成JWT令牌
@@ -70,10 +69,10 @@ class AuthController extends BaseController {
       });
 
       this.logger.info(`用户 ${username} 登录成功`);
-      return res.json(formatResponse(0, '登录成功', { token }));
+      return this.success(res, '登录成功', { token });
     } catch (error) {
       this.logger.error('登录处理发生错误:', error);
-      return res.status(500).json(formatResponse(500, '服务器错误，请稍后再试'));
+      return this.fail(res, '服务器错误，请稍后再试', error, 500);
     }
   }
 
@@ -99,7 +98,7 @@ class AuthController extends BaseController {
       if (existingUser) {
         const field = existingUser.username === username ? '用户名' : '邮箱';
         this.logger.warn(`注册失败：${field} 已被使用`);
-        return res.status(400).json(formatResponse(400, `${field}已被使用`));
+        return this.fail(res, `${field}已被使用`, null, 400);
       }
 
       // 加密密码
@@ -116,14 +115,14 @@ class AuthController extends BaseController {
       });
 
       this.logger.info(`新用户注册成功: ${username}`);
-      return res.status(201).json(formatResponse(0, '注册成功', {
+      return this.success(res, '注册成功', {
         id: newUser.id,
         username: newUser.username,
         email: newUser.email,
-      }));
+      }, 201);
     } catch (error) {
       this.logger.error('注册处理发生错误:', error);
-      return res.status(500).json(formatResponse(500, '服务器错误，请稍后再试'));
+      return this.fail(res, '服务器错误，请稍后再试', error, 500);
     }
   }
 
@@ -141,7 +140,7 @@ class AuthController extends BaseController {
       // 检查用户ID是否存在
       if (!userId) {
         this.logger.warn('获取用户信息失败：用户ID不存在');
-        return res.status(401).json(formatResponse(401, '未授权，无法获取用户信息'));
+        return this.fail(res, '未授权，无法获取用户信息', null, 401);
       }
 
       const user = await prisma.user.findUnique({
@@ -158,13 +157,13 @@ class AuthController extends BaseController {
 
       if (!user) {
         this.logger.warn(`获取用户信息失败：ID为 ${userId} 的用户不存在`);
-        return res.status(404).json(formatResponse(404, '用户不存在'));
+        return this.fail(res, '用户不存在', null, 404);
       }
 
-      return res.json(formatResponse(0, '获取用户信息成功', user));
+      return this.success(res, '获取用户信息成功', user);
     } catch (error) {
       this.logger.error('获取用户信息发生错误:', error);
-      return res.status(500).json(formatResponse(500, '服务器错误，请稍后再试'));
+      return this.fail(res, '服务器错误，请稍后再试', error, 500);
     }
   }
 

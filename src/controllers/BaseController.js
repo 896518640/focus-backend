@@ -44,6 +44,7 @@ class BaseController {
     
     // 构建错误响应
     const response = {
+      code: 1,
       success: false,
       message,
       timestamp: new Date().toISOString()
