@@ -1,9 +1,11 @@
-### 用户统一路由API测试
+### 用户统一路由API测试 ###
+@baseUrl = http://localhost:3000/api/v1
+@authToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJhYjE5ZjBiNC02OGJhLTQ2YmItOTFlYi0wZTNlM2I0MWY2YmIiLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDY1NDQxMTYsImV4cCI6MTc0NjYzMDUxNn0.-XFVixC7PHgDhDpNswi8SKj0rZKOG-PklBi3RSg6H6c
 
-## 认证相关接口
+## 一、认证相关接口 ##
 
-### 用户登录
-POST http://localhost:3000/api/v1/user/auth/login
+### 1.1 用户登录
+POST {{baseUrl}}/user/auth/login
 Content-Type: application/json
 
 {
@@ -11,129 +13,80 @@ Content-Type: application/json
   "password": "admin1"
 }
 
-### 登录成功响应
-# {
-#   "code": 0,
-#   "success": true,
-#   "message": "登录成功",
-#   "data": {
-#     "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxN2Q5YTZiMy01N2Y5LTQyN2UtODUxMC02MTI4ODQ2OWJlOWIiLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDY0MzI3MjgsImV4cCI6MTc0NjUxOTEyOH0.XNzIr0HlVzYfwA-wLUP3LX4ecAsOPIHr3JQ8Ol5eKxk"
-#   },
-#   "timestamp": "2025-05-05T08:12:08.863Z"
-# }
-
-### 用户注册
-POST http://localhost:3000/api/v1/user/auth/register
+### 1.2 用户注册
+POST {{baseUrl}}/user/auth/register
 Content-Type: application/json
 
 {
-  "username": "newuser",
-  "email": "newuser@example.com",
+  "username": "admin",
+  "email": "admin@example.com",
   "password": "admin1"
 }
 
-### 注册成功响应
-# {
-#   "code": 0,
-#   "success": true,
-#   "message": "注册成功",
-#   "data": {
-#     "id": "d45b0356-d6c0-4b22-bb61-ae8eda1d3932",
-#     "username": "newuser",
-#     "email": "newuser@example.com"
-#   },
-#   "timestamp": "2025-05-05T08:12:35.947Z"
-# }
+### 1.3 获取当前用户基本信息
+GET {{baseUrl}}/user/me
+Authorization: Bearer {{authToken}}
 
-### 获取当前用户基本信息
-GET http://localhost:3000/api/v1/user/me
+## 二、用户资料管理 ##
+
+### 2.1 获取用户详细资料(包含会员信息、功能开关、使用情况)
+GET {{baseUrl}}/user/profile
+Authorization: Bearer {{authToken}}
+
+### 2.2 更新用户资料
+PUT {{baseUrl}}/user/profile
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxN2Q5YTZiMy01N2Y5LTQyN2UtODUxMC02MTI4ODQ2OWJlOWIiLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDY0MzExNDksImV4cCI6MTc0NjUxNzU0OX0.1N30jhRQqMNDvTvnet4R_Hbs6l8g6VIFLNRwxoaiMuE
-
-### 获取用户信息成功响应
-# {
-#   "code": 0,
-#   "success": true,
-#   "message": "获取用户信息成功",
-#   "data": {
-#     "id": "17d9a6b3-57f9-427e-8510-61288469be9b",
-#     "username": "admin",
-#     "email": "1@qq.com",
-#     "role": "user",
-#     "createdAt": "2025-04-02T17:05:40.505Z",
-#     "lastLoginAt": "2025-05-05T08:12:08.850Z"
-#   },
-#   "timestamp": "2025-05-05T08:12:56.405Z"
-# }
-
-
-### 获取用户详细资料
-GET http://localhost:3000/api/v1/user/profile
-Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxN2Q5YTZiMy01N2Y5LTQyN2UtODUxMC02MTI4ODQ2OWJlOWIiLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDY0MzExNDksImV4cCI6MTc0NjUxNzU0OX0.1N30jhRQqMNDvTvnet4R_Hbs6l8g6VIFLNRwxoaiMuE
-
-### 获取用户详细资料成功响应
-# {
-#   "code": 0,
-#   "success": true,
-#   "message": "获取用户详细资料成功",
-#   "data": {
-#     "id": "17d9a6b3-57f9-427e-8510-61288469be9b",
-#     "username": "admin",
-#     "email": "1@qq.com",
-#     "avatar": "https://example.com/avatar.png",
-#     "role": "user",
-#     "createdAt": "2025-04-02T17:05:40.505Z",
-#     "lastLoginAt": "2025-05-05T08:12:08.850Z",
-#     "settings": null,
-#     "usageStats": {
-#       "id": "65c7f7f6-7b20-4f60-9540-3b897168799a",
-#       "studyHours": 0,
-#       "recognitionCount": 0,
-#       "fileCount": 0,
-#       "translationCount": 10,
-#       "summaryCount": 0,
-#       "userId": "17d9a6b3-57f9-427e-8510-61288469be9b"
-#     }
-#   },
-#   "timestamp": "2025-05-05T08:13:19.457Z"
-# }
-
-### 更新用户资料
-PUT http://localhost:3000/api/v1/user/profile
-Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxN2Q5YTZiMy01N2Y5LTQyN2UtODUxMC02MTI4ODQ2OWJlOWIiLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDY0MTA2MDcsImV4cCI6MTc0NjQ5NzAwN30.AccclGF7thmxvO0zemSs-KC7ZYLxmvRwIUSUPRxjjAk
+Authorization: Bearer {{authToken}}
 
 {
   "username": "admin",
   "avatar": "https://example.com/avatar.png"
 }
 
-### 更新用户资料成功响应
-# {
-#   "code": 0,
-#   "success": true,
-#   "message": "更新用户资料成功",
-#   "data": {
-#     "id": "17d9a6b3-57f9-427e-8510-61288469be9b",
-#     "username": "admin",
-#     "avatar": "https://example.com/avatar.png"
-#   },
-#   "timestamp": "2025-05-05T08:13:46.181Z"
-# }
+## 三、会员与功能管理 ##
 
+### 3.1 获取会员信息
+GET {{baseUrl}}/user/membership
+Authorization: Bearer {{authToken}}
 
-### 以下接口未实现
-
-### 获取用户活动记录
-GET http://localhost:3000/api/v1/user/activities
+### 3.2 切换翻译功能开关(开启)
+PUT {{baseUrl}}/user/features/translation
+Authorization: Bearer {{authToken}}
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxN2Q5YTZiMy01N2Y5LTQyN2UtODUxMC02MTI4ODQ2OWJlOWIiLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDY0MTA2MDcsImV4cCI6MTc0NjQ5NzAwN30.AccclGF7thmxvO0zemSs-KC7ZYLxmvRwIUSUPRxjjAk
 
-### 记录用户活动
-POST http://localhost:3000/api/v1/user/activities
+{
+  "enabled": true
+}
+
+### 3.3 切换翻译功能开关(关闭)
+PUT {{baseUrl}}/user/features/translation
+Authorization: Bearer {{authToken}}
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxN2Q5YTZiMy01N2Y5LTQyN2UtODUxMC02MTI4ODQ2OWJlOWIiLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDY0MTA2MDcsImV4cCI6MTc0NjQ5NzAwN30.AccclGF7thmxvO0zemSs-KC7ZYLxmvRwIUSUPRxjjAk
+
+{
+  "enabled": false
+}
+
+## 四、统计与使用情况 ##
+
+### 4.1 获取使用情况统计
+GET {{baseUrl}}/user/usage
+Authorization: Bearer {{authToken}}
+
+### 4.2 获取用户使用统计
+GET {{baseUrl}}/user/stats
+Authorization: Bearer {{authToken}}
+
+## 五、用户活动记录 ##
+
+### 5.1 获取用户活动记录
+GET {{baseUrl}}/user/activities
+Authorization: Bearer {{authToken}}
+
+### 5.2 记录用户活动
+POST {{baseUrl}}/user/activities
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
 
 {
   "title": "测试活动",
@@ -143,19 +96,12 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxN2Q5Y
   "iconBg": "#0088ff"
 }
 
-## 用户统计接口
+## 六、用户设置 ##
 
-### 获取用户使用统计
-GET http://localhost:3000/api/v1/user/stats
+### 6.1 更新用户设置
+PUT {{baseUrl}}/user/settings
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxN2Q5YTZiMy01N2Y5LTQyN2UtODUxMC02MTI4ODQ2OWJlOWIiLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDY0MTA2MDcsImV4cCI6MTc0NjQ5NzAwN30.AccclGF7thmxvO0zemSs-KC7ZYLxmvRwIUSUPRxjjAk
-
-## 用户设置接口
-
-### 更新用户设置
-PUT http://localhost:3000/api/v1/user/settings
-Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxN2Q5YTZiMy01N2Y5LTQyN2UtODUxMC02MTI4ODQ2OWJlOWIiLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDY0MTA2MDcsImV4cCI6MTc0NjQ5NzAwN30.AccclGF7thmxvO0zemSs-KC7ZYLxmvRwIUSUPRxjjAk
+Authorization: Bearer {{authToken}}
 
 {
   "defaultSourceLanguage": "zh_cn",
@@ -164,4 +110,116 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxN2Q5Y
   "autoSpeak": false,
   "speechRate": 1.2,
   "theme": "dark"
-} 
+}
+
+## 七、响应示例 ##
+
+### 7.1 登录成功响应
+# {
+#   "code": 0,
+#   "success": true,
+#   "message": "登录成功",
+#   "data": {
+#     "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+#   },
+#   "timestamp": "2025-05-06T15:16:22.925Z"
+# }
+
+### 7.2 获取用户个人资料成功响应
+# {
+#   "code": 0,
+#   "success": true,
+#   "message": "获取用户资料成功",
+#   "data": {
+#     "user_id": "ab19f0b4-68ba-46bb-91eb-0e3e3b41f6bb",
+#     "username": "admin",
+#     "displayName": "FOX_334048",
+#     "email": "admin@example.com",
+#     "avatar": null,
+#     "role": "user",
+#     "createdAt": "2025-05-06T14:55:34.118Z",
+#     "lastLoginAt": "2025-05-06T15:16:22.918Z",
+#     "membership": {
+#       "level": "free",
+#       "next_reset_time": "2025-06-05T15:12:16.290Z",
+#       "total_minutes": 90,
+#       "used_minutes": 0
+#     },
+#     "features": {
+#       "translationEnabled": false
+#     },
+#     "usage": {
+#       "transcribeMinutesUsed": 0,
+#       "translateMinutesUsed": 0
+#     },
+#     "recentActivities": []
+#   },
+#   "timestamp": "2025-05-06T15:16:52.125Z"
+# }
+
+### 7.3 获取会员信息成功响应
+# {
+#   "code": 0,
+#   "success": true,
+#   "message": "获取会员信息成功",
+#   "data": {
+#     "level": "free",
+#     "next_reset_time": "2025-06-05T15:12:16.290Z",
+#     "total_minutes": 90,
+#     "used_minutes": 0,
+#     "remaining_minutes": 90,
+#     "remaining_days": 30,
+#     "is_active": true
+#   },
+#   "timestamp": "2025-05-06T15:17:10.797Z"
+# }
+
+### 7.4 翻译功能开关响应
+# {
+#   "code": 0,
+#   "success": true,
+#   "message": "翻译功能已开启",
+#   "data": {
+#     "translationEnabled": true
+#   },
+#   "timestamp": "2025-05-06T15:17:23.733Z"
+# }
+
+### 7.5 获取使用情况成功响应
+# {
+#   "code": 0,
+#   "success": true,
+#   "message": "获取使用情况成功",
+#   "data": {
+#     "study_hours": 0,
+#     "recognition_count": 0,
+#     "file_count": 0,
+#     "translation_count": 0,
+#     "summary_count": 0,
+#     "transcribe_minutes_used": 0,
+#     "translate_minutes_used": 0,
+#     "total_used_minutes": 0,
+#     "total_allowed_minutes": 90,
+#     "remaining_minutes": 90
+#   },
+#   "timestamp": "2025-05-06T15:17:47.977Z"
+# }
+
+### 7.6 更新用户设置成功响应
+# {
+#   "code": 0,
+#   "success": true,
+#   "message": "更新设置成功",
+#   "data": {
+#     "id": "66ac051c-2b7a-4418-8059-c383c2f5923b",
+#     "defaultSourceLanguage": "zh_cn",
+#     "defaultTargetLanguage": "en_us",
+#     "autoTranslate": true,
+#     "autoSpeak": false,
+#     "speechRate": 1.2,
+#     "theme": "dark",
+#     "translationEnabled": false,
+#     "userId": "ab19f0b4-68ba-46bb-91eb-0e3e3b41f6bb"
+#   },
+#   "timestamp": "2025-05-06T15:15:29.556Z"
+# }

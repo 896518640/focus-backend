@@ -31,26 +31,31 @@ model User {
 }
 
 model Membership {
-  id        String    @id @default(uuid())
-  type      String
-  startDate DateTime  @default(now())
-  endDate   DateTime?
-  isActive  Boolean   @default(true)
-  userId    String    @unique
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id            String    @id @default(uuid())
+  level         String    @default("free") // 会员等级: free/premium
+  startDate     DateTime  @default(now())
+  endDate       DateTime?
+  isActive      Boolean   @default(true)
+  nextResetTime DateTime  @default(now()) // 下次额度重置时间
+  totalMinutes  Int       @default(90)    // 总可用分钟数
+  usedMinutes   Int       @default(0)     // 已使用分钟数
+  userId        String    @unique
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("memberships")
 }
 
 model UsageStats {
-  id               String @id @default(uuid())
-  studyHours       Float  @default(0)
-  recognitionCount Int    @default(0)
-  fileCount        Int    @default(0)
-  translationCount Int    @default(0)
-  summaryCount     Int    @default(0)
-  userId           String @unique
-  user             User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                     String @id @default(uuid())
+  studyHours             Float  @default(0)
+  recognitionCount       Int    @default(0)
+  fileCount              Int    @default(0)
+  translationCount       Int    @default(0)
+  summaryCount           Int    @default(0)
+  transcribeMinutesUsed  Int    @default(0) // 语音转写使用分钟数
+  translateMinutesUsed   Int    @default(0) // 翻译功能使用分钟数
+  userId                 String @unique
+  user                   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("usage_stats")
 }
@@ -65,7 +70,7 @@ model Activity {
   createdAt   DateTime  @default(now())
   userId      String
   audioJobId  String?
-  audioJob    AudioJob? @relation(fields: [audioJobId], references: [id])
+  audioJob    AudioJob? @relation(fields: [audioJobId], references: [id], onDelete: SetNull)
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([audioJobId], map: "activities_audioJobId_fkey")
@@ -128,6 +133,7 @@ model UserSettings {
   autoSpeak             Boolean @default(false)
   speechRate            Float   @default(1)
   theme                 String  @default("system")
+  translationEnabled    Boolean @default(true) // 是否启用翻译功能
   userId                String  @unique
   user                  User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 

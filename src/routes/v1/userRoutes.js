@@ -49,7 +49,7 @@ const routes = [
     method: 'get', 
     handler: userHandler.getUserProfile, 
     middlewares: [authenticate],
-    description: '获取用户详细个人资料'
+    description: '获取用户详细个人资料(包含会员信息、功能开关、使用情况)'
   },
   { 
     path: '/profile', 
@@ -57,6 +57,29 @@ const routes = [
     handler: userHandler.updateUserProfile, 
     middlewares: [authenticate],
     description: '更新用户个人资料'
+  },
+  
+  // 会员信息相关路由组
+  { 
+    path: '/membership', 
+    method: 'get', 
+    handler: userHandler.getUserMembership, 
+    middlewares: [authenticate],
+    description: '获取用户会员信息'
+  },
+  { 
+    path: '/features/translation', 
+    method: 'put', 
+    handler: userHandler.toggleTranslation, 
+    middlewares: [authenticate],
+    description: '开启/关闭翻译功能'
+  },
+  { 
+    path: '/usage', 
+    method: 'get', 
+    handler: userHandler.getUserUsage, 
+    middlewares: [authenticate],
+    description: '获取用户使用情况统计'
   },
   
   // 用户活动记录路由组
