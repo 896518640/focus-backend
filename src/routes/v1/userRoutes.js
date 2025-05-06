@@ -4,19 +4,19 @@
 import express from 'express';
 import { authenticate } from '../../middlewares/authMiddleware.js';
 import { loginValidation, registerValidation } from '../../middlewares/validationMiddleware.js';
-import { registerRoutes, createFunctionHelper } from '../../utils/routeHelper.js';
+import { registerRoutes, createRouteHelper } from '../../utils/routeHelper.js';
 import createLogger from '../../utils/logger.js';
 
 // 导入控制器方法
-import * as authController from '../../controllers/authController.js';
-import * as userController from '../../controllers/userController.js';
+import authController from '../../controllers/authController.js';
+import userController from '../../controllers/userController.js';
 
 const logger = createLogger('UserRoutes');
 const router = express.Router();
 
 // 创建控制器助手，包装所有方法以提供统一的错误处理
-const authHandler = createFunctionHelper(authController);
-const userHandler = createFunctionHelper(userController);
+const authHandler = createRouteHelper(authController);
+const userHandler = createRouteHelper(userController);
 
 // 定义路由配置，按功能分组管理所有用户相关路由
 const routes = [

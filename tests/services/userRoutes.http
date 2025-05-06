@@ -1,6 +1,6 @@
 ### 用户统一路由API测试 ###
 @baseUrl = http://localhost:3000/api/v1
-@authToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJhYjE5ZjBiNC02OGJhLTQ2YmItOTFlYi0wZTNlM2I0MWY2YmIiLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDY1NDQxMTYsImV4cCI6MTc0NjYzMDUxNn0.-XFVixC7PHgDhDpNswi8SKj0rZKOG-PklBi3RSg6H6c
+@authToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJhYjE5ZjBiNC02OGJhLTQ2YmItOTFlYi0wZTNlM2I0MWY2YmIiLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDY1NDgwMzYsImV4cCI6MTc0NjYzNDQzNn0.7neYDZ2lBoh0SFjlWfjxKBwy_HjbE1v6qGQJX07det0
 
 ## 一、认证相关接口 ##
 
@@ -13,25 +13,108 @@ Content-Type: application/json
   "password": "admin1"
 }
 
+# {
+#   "code": 0,
+#   "success": true,
+#   "message": "登录成功",
+#   "data": {
+#     "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJhYjE5ZjBiNC02OGJhLTQ2YmItOTFlYi0wZTNlM2I0MWY2YmIiLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDY1NDgxOTcsImV4cCI6MTc0NjYzNDU5N30.dpZZiUzesHa-bNLjgDzrnZnXFpeHKuhgUY-BiTLNVX8"
+#   },
+#   "timestamp": "2025-05-06T16:16:37.572Z"
+# }
+
 ### 1.2 用户注册
 POST {{baseUrl}}/user/auth/register
 Content-Type: application/json
 
 {
-  "username": "admin",
-  "email": "admin@example.com",
-  "password": "admin1"
+  "username": "admin2",
+  "email": "admin2@example.com",
+  "password": "admin2"
 }
+
+# {
+#   "code": 0,
+#   "success": true,
+#   "message": "注册成功",
+#   "data": {
+#     "id": "02a1ef8c-9282-46c2-81e2-0225ec7c0630",
+#     "username": "admin2",
+#     "displayName": "FOX_219717",
+#     "email": "admin2@example.com"
+#   },
+#   "timestamp": "2025-05-06T16:16:59.794Z"
+# }
 
 ### 1.3 获取当前用户基本信息
 GET {{baseUrl}}/user/me
 Authorization: Bearer {{authToken}}
+
+# {
+#   "code": 0,
+#   "success": true,
+#   "message": "获取用户信息成功",
+#   "data": {
+#     "id": "ab19f0b4-68ba-46bb-91eb-0e3e3b41f6bb",
+#     "username": "admin",
+#     "displayName": "FOX_334048",
+#     "email": "admin@example.com",
+#     "role": "user",
+#     "createdAt": "2025-05-06T14:55:34.118Z",
+#     "lastLoginAt": "2025-05-06T16:13:56.548Z"
+#   },
+#   "timestamp": "2025-05-06T16:14:10.343Z"
+# }
 
 ## 二、用户资料管理 ##
 
 ### 2.1 获取用户完整资料(包含会员信息、功能设置、使用情况)
 GET {{baseUrl}}/user/profile
 Authorization: Bearer {{authToken}}
+
+# {
+#   "code": 0,
+#   "success": true,
+#   "message": "获取用户资料成功",
+#   "data": {
+#     "user_id": "ab19f0b4-68ba-46bb-91eb-0e3e3b41f6bb",
+#     "username": "admin",
+#     "displayName": "FOX_334048",
+#     "email": "admin@example.com",
+#     "avatar": null,
+#     "role": "user",
+#     "createdAt": "2025-05-06T14:55:34.118Z",
+#     "lastLoginAt": "2025-05-06T16:13:56.548Z",
+#     "membership": {
+#       "level": "free",
+#       "next_reset_time": "2025-06-05T15:12:16.290Z",
+#       "total_minutes": 90,
+#       "used_minutes": 0,
+#       "remaining_minutes": 90
+#     },
+#     "features": {
+#       "translationEnabled": false
+#     },
+#     "usage": {
+#       "transcribeMinutesUsed": 0,
+#       "translateMinutesUsed": 0,
+#       "translationCount": 0
+#     },
+#     "settings": {
+#       "id": "66ac051c-2b7a-4418-8059-c383c2f5923b",
+#       "defaultSourceLanguage": "zh_cn",
+#       "defaultTargetLanguage": "en_us",
+#       "autoTranslate": true,
+#       "autoSpeak": false,
+#       "speechRate": 1.2,
+#       "theme": "dark",
+#       "translationEnabled": false,
+#       "userId": "ab19f0b4-68ba-46bb-91eb-0e3e3b41f6bb"
+#     },
+#     "recent_translations": []
+#   },
+#   "timestamp": "2025-05-06T16:14:33.885Z"
+# }
 
 ### 2.2 更新用户基本资料
 PUT {{baseUrl}}/user/profile
@@ -43,6 +126,19 @@ Content-Type: application/json
   "avatar": "https://example.com/avatar.jpg"
 }
 
+# {
+#   "code": 0,
+#   "success": true,
+#   "message": "更新用户资料成功",
+#   "data": {
+#     "id": "ab19f0b4-68ba-46bb-91eb-0e3e3b41f6bb",
+#     "username": "admin",
+#     "displayName": "测试用户",
+#     "avatar": "https://example.com/avatar.jpg"
+#   },
+#   "timestamp": "2025-05-06T16:15:06.436Z"
+# }
+
 ## 三、用户设置管理 ##
 
 ### 3.1 更新用户功能设置
@@ -51,13 +147,31 @@ Authorization: Bearer {{authToken}}
 Content-Type: application/json
 
 {
-  "defaultSourceLanguage": "zh_cn",
-  "defaultTargetLanguage": "en_us",
+  "defaultSourceLanguage": "cn",
+  "defaultTargetLanguage": "en",
   "autoTranslate": true,
   "autoSpeak": false,
   "speechRate": 1,
   "theme": "dark"
 }
+
+# {
+#   "code": 0,
+#   "success": true,
+#   "message": "更新用户设置成功",
+#   "data": {
+#     "id": "66ac051c-2b7a-4418-8059-c383c2f5923b",
+#     "defaultSourceLanguage": "cn",
+#     "defaultTargetLanguage": "en",
+#     "autoTranslate": true,
+#     "autoSpeak": false,
+#     "speechRate": 1,
+#     "theme": "dark",
+#     "translationEnabled": false,
+#     "userId": "ab19f0b4-68ba-46bb-91eb-0e3e3b41f6bb"
+#   },
+#   "timestamp": "2025-05-06T16:15:29.076Z"
+# }
 
 ### 3.2 切换翻译功能开关(开启/关闭)
 PUT {{baseUrl}}/user/settings/translation
@@ -68,61 +182,12 @@ Content-Type: application/json
   "enabled": true
 }
 
-## 四、响应示例 ##
-
-### 4.1 获取用户完整资料响应示例
-# GET /user/profile 成功响应
-{
-  "code": 0,
-  "message": "获取用户资料成功",
-  "data": {
-    "user_id": "ab19f0b4-68ba-46bb-91eb-0e3e3b41f6bb",
-    "username": "admin",
-    "displayName": "管理员",
-    "email": "admin@example.com",
-    "avatar": "https://example.com/avatar.jpg",
-    "role": "user",
-    "createdAt": "2024-05-06T14:30:16.000Z",
-    "lastLoginAt": "2024-05-06T14:30:16.000Z",
-    
-    "membership": {
-      "level": "premium",
-      "next_reset_time": "2024-06-06T14:30:16.000Z",
-      "total_minutes": 10000,
-      "used_minutes": 24,
-      "remaining_minutes": 9976
-    },
-    
-    "features": {
-      "translationEnabled": true
-    },
-    
-    "usage": {
-      "transcribeMinutesUsed": 18,
-      "translateMinutesUsed": 6,
-      "translationCount": 15
-    },
-    
-    "settings": {
-      "defaultSourceLanguage": "zh_cn",
-      "defaultTargetLanguage": "en_us",
-      "autoTranslate": true,
-      "autoSpeak": false,
-      "speechRate": 1,
-      "theme": "dark",
-      "translationEnabled": true
-    },
-    
-    "recent_translations": [
-      {
-        "id": "12345",
-        "title": "会议记录",
-        "createdAt": "2024-05-06T12:30:16.000Z",
-        "status": "success",
-        "sourceLanguage": "zh_cn",
-        "targetLanguage": "en_us",
-        "duration": 3.5
-      }
-    ]
-  }
-}
+# {
+#   "code": 0,
+#   "success": true,
+#   "message": "翻译功能已开启",
+#   "data": {
+#     "translationEnabled": true
+#   },
+#   "timestamp": "2025-05-06T16:15:58.255Z"
+# }

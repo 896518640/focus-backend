@@ -249,14 +249,4 @@ class AuthController extends BaseController {
   }
 }
 
-// 创建实例
-const authController = new AuthController();
-
-// 导出与原接口保持兼容的函数
-export const login = authController.login.bind(authController);
-export const register = authController.register.bind(authController);
-export const getCurrentUser = authController.getCurrentUser.bind(authController);
-export const verifyToken = authController.verifyToken.bind(authController);
-
-// 导出默认实例
-export default authController;
+export default new AuthController();
