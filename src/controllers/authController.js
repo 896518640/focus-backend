@@ -4,11 +4,8 @@
 import BaseController from './BaseController.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../services/prisma.js';
 import createLogger from '../utils/logger.js';
-
-// 创建Prisma客户端实例
-const prisma = new PrismaClient();
 
 // JWT配置
 const JWT_SECRET = process.env.JWT_SECRET || 'speakflow-secret-key';

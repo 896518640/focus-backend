@@ -1,11 +1,9 @@
 import bcrypt from 'bcrypt';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../services/prisma.js';
 import dotenv from 'dotenv';
 
 // 加载环境变量
 dotenv.config();
-
-const prisma = new PrismaClient();
 
 /**
  * 创建默认管理员用户

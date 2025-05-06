@@ -2,13 +2,11 @@
 // 用户控制器，处理用户资料、活动和设置管理
 
 import BaseController from './BaseController.js';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import prisma from '../services/prisma.js';
 
 /**
  * 用户控制器类
- * 处理用户相关操作：个人资料、活动记录、使用统计、设置等
+ * 处理用户相关操作：个人资料、使用统计、设置等
  */
 class UserController extends BaseController {
   constructor() {
@@ -17,6 +15,7 @@ class UserController extends BaseController {
 
   /**
    * 获取用户详细资料
+   * 整合了会员信息、使用统计和功能设置
    * @param {Object} req - 请求对象
    * @param {Object} res - 响应对象
    */
@@ -32,6 +31,7 @@ class UserController extends BaseController {
         return this.fail(res, '未授权，无法获取用户资料', null, 401);
       }
       
+      // 获取用户基本信息、设置和使用统计
       const userProfile = await prisma.user.findUnique({
         where: { id: userId },
         select: {
@@ -44,7 +44,21 @@ class UserController extends BaseController {
           createdAt: true,
           lastLoginAt: true,
           settings: true,
-          usageStats: true
+          usageStats: true,
+          membership: true,
+          translations: {
+            orderBy: { createdAt: 'desc' },
+            take: 10,
+            select: {
+              id: true,
+              title: true,
+              createdAt: true,
+              status: true,
+              sourceLanguage: true,
+              targetLanguage: true,
+              duration: true
+            }
+          }
         }
       });
 
@@ -53,23 +67,13 @@ class UserController extends BaseController {
         return this.fail(res, '用户不存在', null, 404);
       }
 
-      // 获取用户最近活动记录
-      const recentActivities = await prisma.activity.findMany({
-        where: { userId },
-        orderBy: { createdAt: 'desc' },
-        take: 5
-      });
-
-      // 获取会员状态
-      let membership = null;
-      try {
-        membership = await prisma.membership.findUnique({
-          where: { userId }
-        });
-      } catch (err) {
-        this.logger.warn(`获取会员信息失败，可能是数据库结构问题: ${err.message}`);
-        // 不阻止继续执行，使用默认会员信息
-      }
+      // 处理会员信息
+      const membership = userProfile.membership || {
+        level: 'free',
+        nextResetTime: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+        totalMinutes: 90,
+        usedMinutes: 0
+      };
 
       // 处理功能配置
       const features = {
@@ -79,8 +83,12 @@ class UserController extends BaseController {
       // 处理使用情况统计
       const usage = {
         transcribeMinutesUsed: userProfile.usageStats?.transcribeMinutesUsed ?? 0,
-        translateMinutesUsed: userProfile.usageStats?.translateMinutesUsed ?? 0
+        translateMinutesUsed: userProfile.usageStats?.translateMinutesUsed ?? 0,
+        translationCount: userProfile.usageStats?.translationCount ?? 0
       };
+
+      // 计算剩余可用时间
+      const remainingMinutes = membership.totalMinutes - membership.usedMinutes;
 
       this.logger.info(`用户 ${userId} 资料获取成功`);
       return this.success(res, '获取用户资料成功', {
@@ -92,20 +100,35 @@ class UserController extends BaseController {
         role: userProfile.role,
         createdAt: userProfile.createdAt,
         lastLoginAt: userProfile.lastLoginAt,
-        membership: membership ? {
+        
+        // 会员信息
+        membership: {
           level: membership.level || 'free',
           next_reset_time: membership.nextResetTime || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
           total_minutes: membership.totalMinutes || 90,
-          used_minutes: membership.usedMinutes || 0
-        } : {
-          level: 'free',
-          next_reset_time: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 默认30天后
-          total_minutes: 90,
-          used_minutes: 0
+          used_minutes: membership.usedMinutes || 0,
+          remaining_minutes: remainingMinutes > 0 ? remainingMinutes : 0
         },
+        
+        // 功能开关
         features,
+        
+        // 使用统计
         usage,
-        recentActivities
+        
+        // 用户设置
+        settings: userProfile.settings || {
+          defaultSourceLanguage: 'zh_cn',
+          defaultTargetLanguage: 'en_us',
+          autoTranslate: true,
+          autoSpeak: false,
+          speechRate: 1,
+          theme: 'system',
+          translationEnabled: true
+        },
+        
+        // 最近翻译记录
+        recent_translations: userProfile.translations || []
       });
     } catch (error) {
       this.logger.error('获取用户资料失败:', error);
@@ -267,170 +290,43 @@ class UserController extends BaseController {
         this.logger.warn('更新用户设置失败：用户ID不存在');
         return this.fail(res, '未授权，无法更新用户设置', null, 401);
       }
-      
-      const settings = req.body;
 
-      // 验证设置字段
-      const validFields = [
-        'defaultSourceLanguage',
-        'defaultTargetLanguage',
-        'autoTranslate',
-        'autoSpeak',
-        'speechRate',
-        'theme',
-      ];
+      const { 
+        defaultSourceLanguage, 
+        defaultTargetLanguage, 
+        autoTranslate, 
+        autoSpeak, 
+        speechRate, 
+        theme 
+      } = req.body;
 
-      const validSettings = {};
-      for (const key of validFields) {
-        if (settings[key] !== undefined) {
-          validSettings[key] = settings[key];
-        }
-      }
+      // 确保对象存在合法值
+      const settingsToUpdate = {};
+      if (defaultSourceLanguage !== undefined) settingsToUpdate.defaultSourceLanguage = defaultSourceLanguage;
+      if (defaultTargetLanguage !== undefined) settingsToUpdate.defaultTargetLanguage = defaultTargetLanguage;
+      if (autoTranslate !== undefined) settingsToUpdate.autoTranslate = !!autoTranslate;
+      if (autoSpeak !== undefined) settingsToUpdate.autoSpeak = !!autoSpeak;
+      if (speechRate !== undefined) settingsToUpdate.speechRate = parseFloat(speechRate);
+      if (theme !== undefined) settingsToUpdate.theme = theme;
 
-      // 更新或创建用户设置
+      // 使用upsert确保即使用户设置不存在也会创建一个
       const updatedSettings = await prisma.userSettings.upsert({
         where: { userId },
-        update: validSettings,
+        update: settingsToUpdate,
         create: {
-          ...validSettings,
           userId,
+          ...settingsToUpdate,
         },
       });
 
       this.logger.info(`用户 ${userId} 设置更新成功`);
-      return this.success(res, '更新设置成功', updatedSettings);
+      return this.success(res, '更新用户设置成功', updatedSettings);
     } catch (error) {
-      this.logger.error('更新设置失败:', error);
+      this.logger.error('更新用户设置失败:', error);
       return this.fail(res, '服务器错误，请稍后再试', error, 500);
     }
   }
-
-  /**
-   * 记录用户活动
-   * @param {Object} req - 请求对象
-   * @param {Object} res - 响应对象
-   */
-  async recordActivity(req, res) {
-    try {
-      const userId = req.user?.userId;
-      
-      this.logger.info(`尝试记录用户活动，userId: ${userId}`);
-      
-      // 检查用户ID是否存在
-      if (!userId) {
-        this.logger.warn('记录用户活动失败：用户ID不存在');
-        return this.fail(res, '未授权，无法记录用户活动', null, 401);
-      }
-      
-      const { title, description, type, icon, iconBg, audioJobId } = req.body;
-
-      // 创建活动记录
-      const activity = await prisma.activity.create({
-        data: {
-          title,
-          description,
-          type,
-          icon,
-          iconBg,
-          userId,
-          ...(audioJobId && { audioJobId }),
-        },
-      });
-
-      this.logger.info(`用户 ${userId} 活动记录成功，类型: ${type}`);
-      return this.success(res, '记录活动成功', activity);
-    } catch (error) {
-      this.logger.error('记录活动失败:', error);
-      return this.fail(res, '服务器错误，请稍后再试', error, 500);
-    }
-  }
-
-  /**
-   * 获取用户会员信息
-   * @param {Object} req - 请求对象
-   * @param {Object} res - 响应对象
-   */
-  async getUserMembership(req, res) {
-    try {
-      const userId = req.user?.userId;
-      
-      this.logger.info(`尝试获取用户会员信息，userId: ${userId}`);
-      
-      // 检查用户ID是否存在
-      if (!userId) {
-        this.logger.warn('获取会员信息失败：用户ID不存在');
-        return this.fail(res, '未授权，无法获取会员信息', null, 401);
-      }
-      
-      // 获取会员状态
-      let membership = null;
-      try {
-        membership = await prisma.membership.findUnique({
-          where: { userId }
-        });
-      } catch (err) {
-        this.logger.warn(`获取会员信息失败，可能是数据库结构问题: ${err.message}`);
-        // 数据库结构可能有问题，直接创建一个新的会员记录作为替代
-      }
-
-      // 如果会员记录不存在或获取失败，则创建一个默认的免费会员记录
-      if (!membership) {
-        try {
-          // 设置30天后的重置时间
-          const resetDate = new Date();
-          resetDate.setDate(resetDate.getDate() + 30);
-          
-          membership = await prisma.membership.create({
-            data: {
-              userId,
-              level: 'free',
-              nextResetTime: resetDate,
-              totalMinutes: 90,
-              usedMinutes: 0,
-              isActive: true
-            }
-          });
-          
-          this.logger.info(`为用户 ${userId} 创建了默认免费会员记录`);
-        } catch (createErr) {
-          this.logger.error(`创建默认会员记录失败: ${createErr.message}`);
-          // 如果创建也失败，使用内存中的默认值
-          membership = {
-            level: 'free',
-            nextResetTime: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-            totalMinutes: 90,
-            usedMinutes: 0,
-            isActive: true
-          };
-        }
-      }
-
-      // 计算剩余分钟数和剩余天数
-      const level = membership.level || 'free';
-      const totalMinutes = membership.totalMinutes || 90;
-      const usedMinutes = membership.usedMinutes || 0;
-      const nextResetTime = membership.nextResetTime || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
-      const remainingMinutes = totalMinutes - usedMinutes;
-      const now = new Date();
-      const resetDate = new Date(nextResetTime);
-      const remainingDays = Math.max(0, Math.ceil((resetDate - now) / (1000 * 60 * 60 * 24)));
-
-      this.logger.info(`用户 ${userId} 会员信息获取成功`);
-      return this.success(res, '获取会员信息成功', {
-        level,
-        next_reset_time: nextResetTime,
-        total_minutes: totalMinutes,
-        used_minutes: usedMinutes,
-        remaining_minutes: remainingMinutes,
-        remaining_days: remainingDays,
-        is_active: membership.isActive || true
-      });
-    } catch (error) {
-      this.logger.error('获取会员信息失败:', error);
-      return this.fail(res, '服务器错误，请稍后再试', error, 500);
-    }
-  }
-
+  
   /**
    * 切换翻译功能开关
    * @param {Object} req - 请求对象
@@ -466,19 +362,18 @@ class UserController extends BaseController {
           },
           create: {
             userId,
-            translationEnabled: !!enabled
+            translationEnabled: !!enabled,
+            defaultSourceLanguage: 'zh_cn',
+            defaultTargetLanguage: 'en_us'
           }
         });
       } catch (err) {
-        this.logger.warn(`更新翻译功能开关失败，可能是数据库结构问题: ${err.message}`);
-        // 如果数据库更新失败，返回前端开关状态，但不需要导致整个请求失败
-        return this.success(res, `翻译功能已${!!enabled ? '开启' : '关闭'}`, {
-          translationEnabled: !!enabled
-        });
+        this.logger.error(`切换翻译功能失败，数据库错误: ${err.message}`, err);
+        return this.fail(res, '服务器错误，请稍后再试', err, 500);
       }
 
-      this.logger.info(`用户 ${userId} 翻译功能已${settings.translationEnabled ? '开启' : '关闭'}`);
-      return this.success(res, `翻译功能已${settings.translationEnabled ? '开启' : '关闭'}`, {
+      this.logger.info(`用户 ${userId} 翻译功能已${enabled ? '开启' : '关闭'}`);
+      return this.success(res, `翻译功能已${enabled ? '开启' : '关闭'}`, {
         translationEnabled: settings.translationEnabled
       });
     } catch (error) {
@@ -486,118 +381,6 @@ class UserController extends BaseController {
       return this.fail(res, '服务器错误，请稍后再试', error, 500);
     }
   }
-
-  /**
-   * 获取用户使用情况统计
-   * @param {Object} req - 请求对象
-   * @param {Object} res - 响应对象
-   */
-  async getUserUsage(req, res) {
-    try {
-      const userId = req.user?.userId;
-      
-      this.logger.info(`尝试获取用户使用情况，userId: ${userId}`);
-      
-      // 检查用户ID是否存在
-      if (!userId) {
-        this.logger.warn('获取使用情况失败：用户ID不存在');
-        return this.fail(res, '未授权，无法获取使用情况', null, 401);
-      }
-      
-      // 获取使用情况统计
-      let usageStats = null;
-      try {
-        usageStats = await prisma.usageStats.findUnique({
-          where: { userId }
-        });
-      } catch (err) {
-        this.logger.warn(`获取使用情况统计失败，可能是数据库结构问题: ${err.message}`);
-        // 继续执行，使用默认值
-      }
-
-      // 如果没有记录或获取失败，创建一个默认记录
-      if (!usageStats) {
-        try {
-          usageStats = await prisma.usageStats.create({
-            data: {
-              userId,
-              studyHours: 0,
-              recognitionCount: 0,
-              fileCount: 0,
-              translationCount: 0,
-              summaryCount: 0,
-              transcribeMinutesUsed: 0,
-              translateMinutesUsed: 0
-            }
-          });
-          
-          this.logger.info(`为用户 ${userId} 创建了默认使用情况记录`);
-        } catch (createErr) {
-          this.logger.error(`创建默认使用情况记录失败: ${createErr.message}`);
-          // 如果创建也失败，使用内存中的默认值
-          usageStats = {
-            studyHours: 0,
-            recognitionCount: 0,
-            fileCount: 0,
-            translationCount: 0,
-            summaryCount: 0,
-            transcribeMinutesUsed: 0,
-            translateMinutesUsed: 0
-          };
-        }
-      }
-
-      // 获取会员信息
-      let membership = null;
-      try {
-        membership = await prisma.membership.findUnique({
-          where: { userId }
-        });
-      } catch (err) {
-        this.logger.warn(`获取会员信息失败，可能是数据库结构问题: ${err.message}`);
-        // 继续执行，使用默认值
-      }
-
-      // 计算总使用分钟数和剩余分钟数
-      const transcribeMinutesUsed = usageStats.transcribeMinutesUsed || 0;
-      const translateMinutesUsed = usageStats.translateMinutesUsed || 0;
-      const totalUsedMinutes = transcribeMinutesUsed + translateMinutesUsed;
-      const totalAllowedMinutes = membership?.totalMinutes || 90;
-      const remainingMinutes = Math.max(0, totalAllowedMinutes - totalUsedMinutes);
-
-      this.logger.info(`用户 ${userId} 使用情况获取成功`);
-      return this.success(res, '获取使用情况成功', {
-        study_hours: usageStats.studyHours || 0,
-        recognition_count: usageStats.recognitionCount || 0,
-        file_count: usageStats.fileCount || 0,
-        translation_count: usageStats.translationCount || 0,
-        summary_count: usageStats.summaryCount || 0,
-        transcribe_minutes_used: transcribeMinutesUsed,
-        translate_minutes_used: translateMinutesUsed,
-        total_used_minutes: totalUsedMinutes,
-        total_allowed_minutes: totalAllowedMinutes,
-        remaining_minutes: remainingMinutes
-      });
-    } catch (error) {
-      this.logger.error('获取使用情况失败:', error);
-      return this.fail(res, '服务器错误，请稍后再试', error, 500);
-    }
-  }
 }
 
-// 创建控制器实例
-const userController = new UserController();
-
-// 导出方法
-export const getUserProfile = userController.getUserProfile.bind(userController);
-export const updateUserProfile = userController.updateUserProfile.bind(userController);
-export const getUserActivities = userController.getUserActivities.bind(userController);
-export const recordActivity = userController.recordActivity.bind(userController);
-export const getUserStats = userController.getUserStats.bind(userController);
-export const updateUserSettings = userController.updateUserSettings.bind(userController);
-export const getUserMembership = userController.getUserMembership.bind(userController);
-export const toggleTranslation = userController.toggleTranslation.bind(userController);
-export const getUserUsage = userController.getUserUsage.bind(userController);
-
-// 导出默认实例
-export default userController;
+export default new UserController();

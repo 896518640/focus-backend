@@ -49,71 +49,32 @@ const routes = [
     method: 'get', 
     handler: userHandler.getUserProfile, 
     middlewares: [authenticate],
-    description: '获取用户详细个人资料(包含会员信息、功能开关、使用情况)'
+    description: '获取用户完整资料(包含会员信息、功能设置、使用情况)'
   },
   { 
     path: '/profile', 
     method: 'put', 
     handler: userHandler.updateUserProfile, 
     middlewares: [authenticate],
-    description: '更新用户个人资料'
+    description: '更新用户基本资料'
   },
   
-  // 会员信息相关路由组
-  { 
-    path: '/membership', 
-    method: 'get', 
-    handler: userHandler.getUserMembership, 
-    middlewares: [authenticate],
-    description: '获取用户会员信息'
-  },
-  { 
-    path: '/features/translation', 
-    method: 'put', 
-    handler: userHandler.toggleTranslation, 
-    middlewares: [authenticate],
-    description: '开启/关闭翻译功能'
-  },
-  { 
-    path: '/usage', 
-    method: 'get', 
-    handler: userHandler.getUserUsage, 
-    middlewares: [authenticate],
-    description: '获取用户使用情况统计'
-  },
-  
-  // 用户活动记录路由组
-  { 
-    path: '/activities', 
-    method: 'get', 
-    handler: userHandler.getUserActivities, 
-    middlewares: [authenticate],
-    description: '获取用户活动记录'
-  },
-  { 
-    path: '/activities', 
-    method: 'post', 
-    handler: userHandler.recordActivity, 
-    middlewares: [authenticate],
-    description: '记录用户活动'
-  },
-  
-  // 用户统计路由组
-  { 
-    path: '/stats', 
-    method: 'get', 
-    handler: userHandler.getUserStats, 
-    middlewares: [authenticate],
-    description: '获取用户使用统计'
-  },
-  
-  // 用户设置路由组
+  // 功能设置路由组
   { 
     path: '/settings', 
     method: 'put', 
     handler: userHandler.updateUserSettings, 
     middlewares: [authenticate],
-    description: '更新用户设置'
+    description: '更新用户功能设置'
+  },
+  
+  // 翻译功能开关
+  { 
+    path: '/settings/translation', 
+    method: 'put', 
+    handler: userHandler.toggleTranslation, 
+    middlewares: [authenticate],
+    description: '开启/关闭翻译功能'
   }
 ];
 

@@ -29,28 +29,38 @@ Authorization: Bearer {{authToken}}
 
 ## 二、用户资料管理 ##
 
-### 2.1 获取用户详细资料(包含会员信息、功能开关、使用情况)
+### 2.1 获取用户完整资料(包含会员信息、功能设置、使用情况)
 GET {{baseUrl}}/user/profile
 Authorization: Bearer {{authToken}}
 
-### 2.2 更新用户资料
+### 2.2 更新用户基本资料
 PUT {{baseUrl}}/user/profile
-Content-Type: application/json
 Authorization: Bearer {{authToken}}
+Content-Type: application/json
 
 {
-  "username": "admin",
-  "avatar": "https://example.com/avatar.png"
+  "displayName": "测试用户",
+  "avatar": "https://example.com/avatar.jpg"
 }
 
-## 三、会员与功能管理 ##
+## 三、用户设置管理 ##
 
-### 3.1 获取会员信息
-GET {{baseUrl}}/user/membership
+### 3.1 更新用户功能设置
+PUT {{baseUrl}}/user/settings
 Authorization: Bearer {{authToken}}
+Content-Type: application/json
 
-### 3.2 切换翻译功能开关(开启)
-PUT {{baseUrl}}/user/features/translation
+{
+  "defaultSourceLanguage": "zh_cn",
+  "defaultTargetLanguage": "en_us",
+  "autoTranslate": true,
+  "autoSpeak": false,
+  "speechRate": 1,
+  "theme": "dark"
+}
+
+### 3.2 切换翻译功能开关(开启/关闭)
+PUT {{baseUrl}}/user/settings/translation
 Authorization: Bearer {{authToken}}
 Content-Type: application/json
 
@@ -58,168 +68,61 @@ Content-Type: application/json
   "enabled": true
 }
 
-### 3.3 切换翻译功能开关(关闭)
-PUT {{baseUrl}}/user/features/translation
-Authorization: Bearer {{authToken}}
-Content-Type: application/json
+## 四、响应示例 ##
 
+### 4.1 获取用户完整资料响应示例
+# GET /user/profile 成功响应
 {
-  "enabled": false
+  "code": 0,
+  "message": "获取用户资料成功",
+  "data": {
+    "user_id": "ab19f0b4-68ba-46bb-91eb-0e3e3b41f6bb",
+    "username": "admin",
+    "displayName": "管理员",
+    "email": "admin@example.com",
+    "avatar": "https://example.com/avatar.jpg",
+    "role": "user",
+    "createdAt": "2024-05-06T14:30:16.000Z",
+    "lastLoginAt": "2024-05-06T14:30:16.000Z",
+    
+    "membership": {
+      "level": "premium",
+      "next_reset_time": "2024-06-06T14:30:16.000Z",
+      "total_minutes": 10000,
+      "used_minutes": 24,
+      "remaining_minutes": 9976
+    },
+    
+    "features": {
+      "translationEnabled": true
+    },
+    
+    "usage": {
+      "transcribeMinutesUsed": 18,
+      "translateMinutesUsed": 6,
+      "translationCount": 15
+    },
+    
+    "settings": {
+      "defaultSourceLanguage": "zh_cn",
+      "defaultTargetLanguage": "en_us",
+      "autoTranslate": true,
+      "autoSpeak": false,
+      "speechRate": 1,
+      "theme": "dark",
+      "translationEnabled": true
+    },
+    
+    "recent_translations": [
+      {
+        "id": "12345",
+        "title": "会议记录",
+        "createdAt": "2024-05-06T12:30:16.000Z",
+        "status": "success",
+        "sourceLanguage": "zh_cn",
+        "targetLanguage": "en_us",
+        "duration": 3.5
+      }
+    ]
+  }
 }
-
-## 四、统计与使用情况 ##
-
-### 4.1 获取使用情况统计
-GET {{baseUrl}}/user/usage
-Authorization: Bearer {{authToken}}
-
-### 4.2 获取用户使用统计
-GET {{baseUrl}}/user/stats
-Authorization: Bearer {{authToken}}
-
-## 五、用户活动记录 ##
-
-### 5.1 获取用户活动记录
-GET {{baseUrl}}/user/activities
-Authorization: Bearer {{authToken}}
-
-### 5.2 记录用户活动
-POST {{baseUrl}}/user/activities
-Content-Type: application/json
-Authorization: Bearer {{authToken}}
-
-{
-  "title": "测试活动",
-  "description": "用户进行了测试操作",
-  "type": "test",
-  "icon": "test",
-  "iconBg": "#0088ff"
-}
-
-## 六、用户设置 ##
-
-### 6.1 更新用户设置
-PUT {{baseUrl}}/user/settings
-Content-Type: application/json
-Authorization: Bearer {{authToken}}
-
-{
-  "defaultSourceLanguage": "zh_cn",
-  "defaultTargetLanguage": "en_us",
-  "autoTranslate": true,
-  "autoSpeak": false,
-  "speechRate": 1.2,
-  "theme": "dark"
-}
-
-## 七、响应示例 ##
-
-### 7.1 登录成功响应
-# {
-#   "code": 0,
-#   "success": true,
-#   "message": "登录成功",
-#   "data": {
-#     "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-#   },
-#   "timestamp": "2025-05-06T15:16:22.925Z"
-# }
-
-### 7.2 获取用户个人资料成功响应
-# {
-#   "code": 0,
-#   "success": true,
-#   "message": "获取用户资料成功",
-#   "data": {
-#     "user_id": "ab19f0b4-68ba-46bb-91eb-0e3e3b41f6bb",
-#     "username": "admin",
-#     "displayName": "FOX_334048",
-#     "email": "admin@example.com",
-#     "avatar": null,
-#     "role": "user",
-#     "createdAt": "2025-05-06T14:55:34.118Z",
-#     "lastLoginAt": "2025-05-06T15:16:22.918Z",
-#     "membership": {
-#       "level": "free",
-#       "next_reset_time": "2025-06-05T15:12:16.290Z",
-#       "total_minutes": 90,
-#       "used_minutes": 0
-#     },
-#     "features": {
-#       "translationEnabled": false
-#     },
-#     "usage": {
-#       "transcribeMinutesUsed": 0,
-#       "translateMinutesUsed": 0
-#     },
-#     "recentActivities": []
-#   },
-#   "timestamp": "2025-05-06T15:16:52.125Z"
-# }
-
-### 7.3 获取会员信息成功响应
-# {
-#   "code": 0,
-#   "success": true,
-#   "message": "获取会员信息成功",
-#   "data": {
-#     "level": "free",
-#     "next_reset_time": "2025-06-05T15:12:16.290Z",
-#     "total_minutes": 90,
-#     "used_minutes": 0,
-#     "remaining_minutes": 90,
-#     "remaining_days": 30,
-#     "is_active": true
-#   },
-#   "timestamp": "2025-05-06T15:17:10.797Z"
-# }
-
-### 7.4 翻译功能开关响应
-# {
-#   "code": 0,
-#   "success": true,
-#   "message": "翻译功能已开启",
-#   "data": {
-#     "translationEnabled": true
-#   },
-#   "timestamp": "2025-05-06T15:17:23.733Z"
-# }
-
-### 7.5 获取使用情况成功响应
-# {
-#   "code": 0,
-#   "success": true,
-#   "message": "获取使用情况成功",
-#   "data": {
-#     "study_hours": 0,
-#     "recognition_count": 0,
-#     "file_count": 0,
-#     "translation_count": 0,
-#     "summary_count": 0,
-#     "transcribe_minutes_used": 0,
-#     "translate_minutes_used": 0,
-#     "total_used_minutes": 0,
-#     "total_allowed_minutes": 90,
-#     "remaining_minutes": 90
-#   },
-#   "timestamp": "2025-05-06T15:17:47.977Z"
-# }
-
-### 7.6 更新用户设置成功响应
-# {
-#   "code": 0,
-#   "success": true,
-#   "message": "更新设置成功",
-#   "data": {
-#     "id": "66ac051c-2b7a-4418-8059-c383c2f5923b",
-#     "defaultSourceLanguage": "zh_cn",
-#     "defaultTargetLanguage": "en_us",
-#     "autoTranslate": true,
-#     "autoSpeak": false,
-#     "speechRate": 1.2,
-#     "theme": "dark",
-#     "translationEnabled": false,
-#     "userId": "ab19f0b4-68ba-46bb-91eb-0e3e3b41f6bb"
-#   },
-#   "timestamp": "2025-05-06T15:15:29.556Z"
-# }

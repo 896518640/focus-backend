@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
 }
 
 datasource db {
@@ -20,8 +21,6 @@ model User {
   lastLoginAt  DateTime?
   refreshToken String?
   isActive     Boolean       @default(true)
-  activities   Activity[]
-  audioJobs    AudioJob[]
   membership   Membership?
   translations Translation[]
   usageStats   UsageStats?
@@ -46,57 +45,14 @@ model Membership {
 }
 
 model UsageStats {
-  id                     String @id @default(uuid())
-  studyHours             Float  @default(0)
-  recognitionCount       Int    @default(0)
-  fileCount              Int    @default(0)
-  translationCount       Int    @default(0)
-  summaryCount           Int    @default(0)
-  transcribeMinutesUsed  Int    @default(0) // 语音转写使用分钟数
-  translateMinutesUsed   Int    @default(0) // 翻译功能使用分钟数
-  userId                 String @unique
-  user                   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                    String @id @default(uuid())
+  transcribeMinutesUsed Int    @default(0) // 语音转写使用分钟数
+  translateMinutesUsed  Int    @default(0) // 翻译功能使用分钟数
+  translationCount      Int    @default(0) // 翻译次数
+  userId                String @unique
+  user                  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("usage_stats")
-}
-
-model Activity {
-  id          String    @id @default(uuid())
-  title       String
-  description String?
-  type        String
-  icon        String?
-  iconBg      String?
-  createdAt   DateTime  @default(now())
-  userId      String
-  audioJobId  String?
-  audioJob    AudioJob? @relation(fields: [audioJobId], references: [id], onDelete: SetNull)
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([audioJobId], map: "activities_audioJobId_fkey")
-  @@index([userId], map: "activities_userId_fkey")
-  @@map("activities")
-}
-
-model AudioJob {
-  id             String     @id @default(uuid())
-  filename       String?
-  fileUrl        String?
-  duration       Float?
-  status         String
-  sourceText     String?    @db.Text
-  translatedText String?    @db.Text
-  summary        String?    @db.Text
-  sourceLanguage String?
-  targetLanguage String?
-  createdAt      DateTime   @default(now())
-  updatedAt      DateTime   @updatedAt
-  userId         String
-  activities     Activity[]
-  user           User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId], map: "audio_jobs_userId_fkey")
-  @@map("audio_jobs")
 }
 
 model Translation {
