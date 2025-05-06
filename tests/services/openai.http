@@ -1,7 +1,9 @@
+@baseUrl = http://localhost:3000/api/v1
+@authToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJhYjE5ZjBiNC02OGJhLTQ2YmItOTFlYi0wZTNlM2I0MWY2YmIiLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDY1NDgwMzYsImV4cCI6MTc0NjYzNDQzNn0.7neYDZ2lBoh0SFjlWfjxKBwy_HjbE1v6qGQJX07det0
 ### 创建聊天完成
-POST http://localhost:3000/api/v1/openai/chat
+POST {{baseUrl}}/openai/chat
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxN2Q5YTZiMy01N2Y5LTQyN2UtODUxMC02MTI4ODQ2OWJlOWIiLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDY0MTA2MDcsImV4cCI6MTc0NjQ5NzAwN30.AccclGF7thmxvO0zemSs-KC7ZYLxmvRwIUSUPRxjjAk
+Authorization: Bearer {{authToken}}
 
 {
   "model": "anthropic/claude-3.5-sonnet",
@@ -62,14 +64,14 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxN2Q5Y
 
 
 ### 获取OpenAI配置信息
-GET http://localhost:3000/api/v1/openai/config
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxN2Q5YTZiMy01N2Y5LTQyN2UtODUxMC02MTI4ODQ2OWJlOWIiLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDY0MTA2MDcsImV4cCI6MTc0NjQ5NzAwN30.AccclGF7thmxvO0zemSs-KC7ZYLxmvRwIUSUPRxjjAk
+GET {{baseUrl}}/openai/config
+Authorization: Bearer {{authToken}}
 
 
 ### 创建流式聊天完成
-POST http://localhost:3000/api/v1/openai/chat/stream
+POST {{baseUrl}}/openai/chat/stream
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxN2Q5YTZiMy01N2Y5LTQyN2UtODUxMC02MTI4ODQ2OWJlOWIiLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDY0MTA2MDcsImV4cCI6MTc0NjQ5NzAwN30.AccclGF7thmxvO0zemSs-KC7ZYLxmvRwIUSUPRxjjAk
+Authorization: Bearer {{authToken}}
 
 {
   "model": "anthropic/claude-3.5-sonnet",

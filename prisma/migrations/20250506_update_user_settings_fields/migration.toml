@@ -1,0 +1,6 @@
+# migration.toml
+# This file contains the configuration for a Prisma migration
+
+# Prisma migration metadata
+migration_id = "20250506_update_user_settings_fields"
+checksum = "a7e07e9f9e9d9b9c9e9d9b9c9e9d9b9c" 

@@ -90,6 +90,18 @@ class UserController extends BaseController {
       // 计算剩余可用时间
       const remainingMinutes = membership.totalMinutes - membership.usedMinutes;
 
+      // 准备默认设置
+      const defaultSettings = {
+        sourceLanguage: 'cn',
+        targetLanguage: 'en',
+        autoSave: true,
+        theme: 'system',
+        translationEnabled: true
+      };
+      
+      // 用户设置（使用默认值填充缺失字段）
+      const userSettings = userProfile.settings || defaultSettings;
+
       this.logger.info(`用户 ${userId} 资料获取成功`);
       return this.success(res, '获取用户资料成功', {
         user_id: userProfile.id,
@@ -117,14 +129,12 @@ class UserController extends BaseController {
         usage,
         
         // 用户设置
-        settings: userProfile.settings || {
-          defaultSourceLanguage: 'zh_cn',
-          defaultTargetLanguage: 'en_us',
-          autoTranslate: true,
-          autoSpeak: false,
-          speechRate: 1,
-          theme: 'system',
-          translationEnabled: true
+        settings: {
+          sourceLanguage: userSettings.sourceLanguage || 'cn',
+          targetLanguage: userSettings.targetLanguage || 'en',
+          autoSave: userSettings.autoSave !== undefined ? userSettings.autoSave : true,
+          theme: userSettings.theme || 'system',
+          translationEnabled: userSettings.translationEnabled !== undefined ? userSettings.translationEnabled : true
         },
         
         // 最近翻译记录
@@ -292,22 +302,21 @@ class UserController extends BaseController {
       }
 
       const { 
-        defaultSourceLanguage, 
-        defaultTargetLanguage, 
-        autoTranslate, 
-        autoSpeak, 
-        speechRate, 
-        theme 
+        sourceLanguage,
+        targetLanguage, 
+        autoSave,
+        theme,
+        translationEnabled 
       } = req.body;
 
       // 确保对象存在合法值
       const settingsToUpdate = {};
-      if (defaultSourceLanguage !== undefined) settingsToUpdate.defaultSourceLanguage = defaultSourceLanguage;
-      if (defaultTargetLanguage !== undefined) settingsToUpdate.defaultTargetLanguage = defaultTargetLanguage;
-      if (autoTranslate !== undefined) settingsToUpdate.autoTranslate = !!autoTranslate;
-      if (autoSpeak !== undefined) settingsToUpdate.autoSpeak = !!autoSpeak;
-      if (speechRate !== undefined) settingsToUpdate.speechRate = parseFloat(speechRate);
+      
+      if (sourceLanguage !== undefined) settingsToUpdate.sourceLanguage = sourceLanguage;
+      if (targetLanguage !== undefined) settingsToUpdate.targetLanguage = targetLanguage;
+      if (autoSave !== undefined) settingsToUpdate.autoSave = !!autoSave;
       if (theme !== undefined) settingsToUpdate.theme = theme;
+      if (translationEnabled !== undefined) settingsToUpdate.translationEnabled = !!translationEnabled;
 
       // 使用upsert确保即使用户设置不存在也会创建一个
       const updatedSettings = await prisma.userSettings.upsert({
@@ -316,6 +325,11 @@ class UserController extends BaseController {
         create: {
           userId,
           ...settingsToUpdate,
+          sourceLanguage: settingsToUpdate.sourceLanguage || 'cn',
+          targetLanguage: settingsToUpdate.targetLanguage || 'en',
+          autoSave: settingsToUpdate.autoSave !== undefined ? settingsToUpdate.autoSave : true,
+          theme: settingsToUpdate.theme || 'system',
+          translationEnabled: settingsToUpdate.translationEnabled !== undefined ? settingsToUpdate.translationEnabled : true
         },
       });
 
@@ -363,8 +377,10 @@ class UserController extends BaseController {
           create: {
             userId,
             translationEnabled: !!enabled,
-            defaultSourceLanguage: 'zh_cn',
-            defaultTargetLanguage: 'en_us'
+            sourceLanguage: 'cn',
+            targetLanguage: 'en',
+            autoSave: true,
+            theme: 'system'
           }
         });
       } catch (err) {

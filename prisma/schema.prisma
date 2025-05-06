@@ -83,13 +83,11 @@ model Translation {
 
 model UserSettings {
   id                    String  @id @default(uuid())
-  defaultSourceLanguage String  @default("zh_cn")
-  defaultTargetLanguage String  @default("en_us")
-  autoTranslate         Boolean @default(true)
-  autoSpeak             Boolean @default(false)
-  speechRate            Float   @default(1)
+  sourceLanguage        String  @default("cn")      // 修改字段名以匹配前端
+  targetLanguage        String  @default("en")      // 修改字段名以匹配前端
+  autoSave              Boolean @default(true)     // 新增字段
   theme                 String  @default("system")
-  translationEnabled    Boolean @default(true) // 是否启用翻译功能
+  translationEnabled    Boolean @default(true)     // 是否启用翻译功能
   userId                String  @unique
   user                  User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
