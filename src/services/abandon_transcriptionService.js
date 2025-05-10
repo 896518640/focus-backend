@@ -1,7 +1,7 @@
 // transcriptionService.js
 // 音频转录服务，负责音频转录流程管理
 
-import tingwuService from './tingwuService.js';
+import tingwuService from './abandon_tingwuService.js';
 import path from 'path';
 import BaseService from './BaseService.js';
 

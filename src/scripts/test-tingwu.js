@@ -2,7 +2,7 @@
 // scripts/test-tingwu.js
 // 通义听悟服务测试脚本
 
-import mainTingwuService from '../src/services/mainTingwuService.js';
+import mainTingwuService from '../services/tingwuService.js';
 import { promises as fs } from 'fs';
 import path from 'path';
 import readline from 'readline';

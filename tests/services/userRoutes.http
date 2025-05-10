@@ -1,6 +1,6 @@
 ### 用户统一路由API测试 ###
 @baseUrl = http://localhost:3000/api/v1
-@authToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJhYjE5ZjBiNC02OGJhLTQ2YmItOTFlYi0wZTNlM2I0MWY2YmIiLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDY1NDgwMzYsImV4cCI6MTc0NjYzNDQzNn0.7neYDZ2lBoh0SFjlWfjxKBwy_HjbE1v6qGQJX07det0
+@authToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJiOWEwOGEyMi03ZjAxLTQ1YWUtOWRkZC02MGQyZTE1NjM3ZTgiLCJ1c2VybmFtZSI6ImFkbWluMSIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzQ2ODUyMTg0LCJleHAiOjE3NDY5Mzg1ODR9.ZCuN_Eq522rdNLhuDsQyiUDH4rQ1vwWAHnZVA1K7E-8
 
 ## 一、认证相关接口 ##
 
@@ -9,7 +9,7 @@ POST {{baseUrl}}/user/auth/login
 Content-Type: application/json
 
 {
-  "username": "admin",
+  "username": "admin1",
   "password": "admin1"
 }
 
@@ -28,9 +28,9 @@ POST {{baseUrl}}/user/auth/register
 Content-Type: application/json
 
 {
-  "username": "admin2",
-  "email": "admin2@example.com",
-  "password": "admin2"
+  "username": "admin1",
+  "email": "admin1@example.com",
+  "password": "admin1"
 }
 
 # {
@@ -122,7 +122,7 @@ Authorization: Bearer {{authToken}}
 Content-Type: application/json
 
 {
-  "displayName": "测试用户",
+  "displayName": "测试用户_asd",
   "avatar": "https://example.com/avatar.jpg"
 }
 
@@ -147,12 +147,11 @@ Authorization: Bearer {{authToken}}
 Content-Type: application/json
 
 {
-  "defaultSourceLanguage": "cn",
-  "defaultTargetLanguage": "en",
-  "autoTranslate": true,
-  "autoSpeak": false,
-  "speechRate": 1,
-  "theme": "dark"
+    "sourceLanguage": "cn",
+    "targetLanguage": "en",
+    "translationEnabled": true,
+    "autoSave": false,
+    "theme": "dark"
 }
 
 # {
