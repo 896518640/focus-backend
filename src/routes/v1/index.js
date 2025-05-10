@@ -3,7 +3,7 @@
 
 import express from 'express';
 import userRoutes from './userRoutes.js';
-import mainTingwuRoutes from './mainTingwuRoutes.js';
+import tingwuRoutes from './tingwuRoutes.js';
 import translationRoutes from './translationRoutes.js';
 import openaiRoutes from './openaiRoutes.js';
 import createLogger from '../../utils/logger.js';
@@ -17,7 +17,7 @@ const router = express.Router();
 
 // 注册子路由模块
 router.use('/user', userRoutes);
-router.use('/tingwu', mainTingwuRoutes);
+router.use('/tingwu', tingwuRoutes);
 router.use('/translation', translationRoutes);
 router.use('/openai', openaiRoutes);
 

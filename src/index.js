@@ -2,7 +2,6 @@ import express from 'express';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import config, { validateConfig } from './config/index.js';
-import SpeechController from './controllers/speechController.js';
 import createLogger from './utils/logger.js';
 import apiV1Routes from './routes/v1/index.js';
 import path from 'path';
@@ -31,14 +30,6 @@ const app = express();
 
 // 创建HTTP服务器
 const server = createServer(app);
-
-// 创建Socket.IO实例
-const io = new Server(server, { 
-  cors: {
-    origin: config.server.cors.origin,
-    methods: ['GET', 'POST']
-  }
-});
 
 // 配置中间件
 app.use(express.json()); // 解析JSON请求体
@@ -74,8 +65,6 @@ if (process.env.NODE_ENV !== 'production') {
   logger.info('API文档已启用，访问路径: /api-docs');
 }
 
-// 初始化控制器
-new SpeechController(io);
 
 // 注册API路由
 app.use('/api/v1', apiV1Routes);

@@ -13,10 +13,10 @@ import BaseService from './BaseService.js';
  * 通义听悟服务
  * 封装CreateTask和GetTaskInfo两个核心API
  */
-class MainTingwuService extends BaseService {
+class TingwuService extends BaseService {
   constructor() {
-    super('MainTingwuService');
-    this.logger = createLogger('MainTingwuService');
+    super('TingwuService');
+    this.logger = createLogger('TingwuService');
     
     // 初始化配置检查
     this.initConfig();
@@ -249,6 +249,6 @@ class MainTingwuService extends BaseService {
 }
 
 // 创建单例实例
-const mainTingwuService = new MainTingwuService();
+const tingwuService = new TingwuService();
 
-export default mainTingwuService; 
+export default tingwuService; 

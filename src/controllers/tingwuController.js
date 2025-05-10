@@ -2,15 +2,15 @@
 // 简化版通义听悟控制器 - 只提供两个核心接口
 
 import BaseController from './BaseController.js';
-import mainTingwuService from '../services/tingwuService.js';
+import tingwuService from '../services/tingwuService.js';
 
 /**
  * 简化版通义听悟控制器
  * 只处理CreateTask和GetTaskInfo两个核心API对应的HTTP请求
  */
-class MainTingwuController extends BaseController {
+class TingwuController extends BaseController {
   constructor() {
-    super('MainTingwuController');
+    super('TingwuController');
   }
 
   /**
@@ -35,7 +35,7 @@ class MainTingwuController extends BaseController {
       let parsedParams = typeof parameters === 'string' ? JSON.parse(parameters) : parameters;
       
       // 调用服务创建任务
-      const result = await mainTingwuService.createTask({
+      const result = await tingwuService.createTask({
         type,
         input: parsedInput,
         parameters: parsedParams,
@@ -78,7 +78,7 @@ class MainTingwuController extends BaseController {
       }
       
       // 调用服务获取任务信息
-      const result = await mainTingwuService.getTaskInfo(taskId);
+      const result = await tingwuService.getTaskInfo(taskId);
       
       // 优化响应结构：合并data和内部数据，避免嵌套，保留requestId
       const responseData = {
@@ -104,6 +104,6 @@ class MainTingwuController extends BaseController {
 }
 
 // 创建单例实例
-const mainTingwuController = new MainTingwuController();
+const tingwuController = new TingwuController();
 
-export default mainTingwuController; 
+export default tingwuController; 

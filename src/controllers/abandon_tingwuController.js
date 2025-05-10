@@ -4,7 +4,7 @@
 import BaseController from './BaseController.js';
 import fileUploadService from '../services/fileUploadService.js';
 import tingwuService from '../services/abandon_tingwuService.js';
-import transcriptionService from '../services/transcriptionService.js';
+import transcriptionService from '../services/abandon_transcriptionService.js';
 import axios from 'axios';
 
 /**
