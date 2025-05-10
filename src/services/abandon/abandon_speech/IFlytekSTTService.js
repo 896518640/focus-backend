@@ -1,9 +1,9 @@
 import WebSocket from 'ws';
 import CryptoJS from 'crypto-js';
 import BaseSpeechService from './BaseSpeechService.js';
-import { SpeechServiceError, ConnectionError } from '../../utils/errors.js';
-import createLogger from '../../utils/logger.js';
-import config from '../../config/index.js';
+import { SpeechServiceError, ConnectionError } from '../../../utils/errors.js';
+import createLogger from '../../../utils/logger.js';
+import config from '../../../config/index.js';
 
 const logger = createLogger('IFlytekSTTService');
 

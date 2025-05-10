@@ -1,10 +1,10 @@
 // tingwuController.js
 // 通义听悟功能控制器
 
-import BaseController from './BaseController.js';
-import fileUploadService from '../services/fileUploadService.js';
-import tingwuService from '../services/abandon_tingwuService.js';
-import transcriptionService from '../services/abandon_transcriptionService.js';
+import BaseController from '../BaseController.js';
+import fileUploadService from '../../services/fileUploadService.js';
+import tingwuService from '../../services/abandon/abandon_tingwuService.js';
+import transcriptionService from '../../services/abandon/abandon_transcriptionService.js';
 import axios from 'axios';
 
 /**

@@ -4,10 +4,10 @@
 import Tingwu from '@alicloud/tingwu20230930';
 import * as OpenApi from '@alicloud/openapi-client';
 import * as Util from '@alicloud/tea-util';
-import BaseService from './BaseService.js';
-import configService from '../config/configService.js';
-import { ConfigError, AppError, ServiceError } from '../utils/errors.js';
-import cacheService from './cacheService.js';
+import BaseService from '../BaseService.js';
+import configService from '../../config/configService.js';
+import { ConfigError, AppError, ServiceError } from '../../utils/errors.js';
+import cacheService from '../cacheService.js';
 import axios from 'axios';
 
 /**

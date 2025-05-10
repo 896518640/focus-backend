@@ -1,9 +1,9 @@
 // speechController.js
 // 语音识别控制器，处理Socket.IO连接和语音识别会话
 
-import BaseController from './BaseController.js';
+import BaseController from '../BaseController.js';
 import SpeechServiceFactory, { SpeechServiceType } from '../services/speech/SpeechServiceFactory.js';
-import { SpeechServiceError } from '../utils/errors.js';
+import { SpeechServiceError } from '../../utils/errors.js';
 
 /**
  * 处理Socket.IO连接和语音识别会话

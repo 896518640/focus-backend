@@ -1,5 +1,5 @@
-import { SpeechServiceError } from '../../utils/errors.js';
-import createLogger from '../../utils/logger.js';
+import { SpeechServiceError } from '../../../utils/errors.js';
+import createLogger from '../../../utils/logger.js';
 
 const logger = createLogger('BaseSpeechService');
 

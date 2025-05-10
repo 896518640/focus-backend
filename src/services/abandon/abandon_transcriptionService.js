@@ -3,7 +3,7 @@
 
 import tingwuService from './abandon_tingwuService.js';
 import path from 'path';
-import BaseService from './BaseService.js';
+import BaseService from '../BaseService.js';
 
 /**
  * 音频转录服务类
